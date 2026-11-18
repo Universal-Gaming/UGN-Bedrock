@@ -52,6 +52,7 @@ const existingForced = config.forceSettings || {};
 config.defaultSettings = {
   ...existingSettings,
   rendererMesher: "legacy-js",
+  mouseRawInput: false,
   useVersionsTextures: "",
   disableAssets: false,
   enabledResourcepack: null
@@ -59,6 +60,7 @@ config.defaultSettings = {
 config.forceSettings = {
   ...existingForced,
   rendererMesher: true,
+  mouseRawInput: true,
   useVersionsTextures: true,
   disableAssets: true
 };
