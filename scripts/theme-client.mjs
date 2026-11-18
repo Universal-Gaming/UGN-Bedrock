@@ -37,6 +37,8 @@ function replaceOnce(value, search, replacement, desc) {
   return value.replace(search, replacement);
 }
 let next = replaceOnce(original, oldHeader, newHeader, "menu title");
+next = replaceOnce(next, "    <div className={styles.root}>", "    <div className={styles.root} onPointerMove={(event) => {\n      if (event.pointerType !== 'mouse') return\n      const el = event.currentTarget\n      el.style.setProperty('--ugn-pointer-x', ((event.clientX / Math.max(1, el.clientWidth) - .5) * 2).toFixed(3))\n      el.style.setProperty('--ugn-pointer-y', ((event.clientY / Math.max(1, el.clientHeight) - .5) * 2).toFixed(3))\n    }} onPointerLeave={(event) => {\n      event.currentTarget.style.setProperty('--ugn-pointer-x', '0')\n      event.currentTarget.style.setProperty('--ugn-pointer-y', '0')\n    }}>\n      <div className=\"ugn-menu-background\" aria-hidden=\"true\">\n        <div className=\"ugn-menu-stars ugn-menu-stars-near\" />\n        <div className=\"ugn-menu-stars ugn-menu-stars-far\" />\n        <div className=\"ugn-menu-nebula\" />\n        <div className=\"ugn-menu-planet-system\">\n          <div className=\"ugn-menu-planet\"><div className=\"ugn-menu-planet-texture\" /></div>\n          <div className=\"ugn-menu-ring ugn-menu-ring-back\" />\n          <div className=\"ugn-menu-ring ugn-menu-ring-front\" />\n          <div className=\"ugn-menu-moon\" />\n        </div>\n        <div className=\"ugn-menu-grid\" />\n        <div className=\"ugn-menu-vignette\" />\n      </div>", "animated UGN menu background");
+next = replaceOnce(next, "        <div className={styles['menu-row']}>\n          <PauseLinkButtons />\n        </div>", "        <a className=\"ugn-menu-discord\" href=\"https://discord.universalgaming.us/\" target=\"_blank\" rel=\"noopener noreferrer\">\n          JOIN UGN DISCORD ↗\n        </a>\n        <div className={styles['menu-row']}>\n          <PauseLinkButtons />\n        </div>", "direct UGN Discord menu link");
 next = replaceOnce(next, "\n          Connect to server\n", "\n          Multiplayer\n", "multiplayer button");
 next = replaceOnce(next, "\n            Singleplayer\n", "\n            Singleplayer\n", "singleplayer button");
 next = replaceOnce(next, "\n          Options\n", "\n          Settings\n", "settings button");
@@ -230,4 +232,7 @@ const theme = String.raw`
 }
 `;
 fs.writeFileSync(stylesheetFile, css + theme);
-console.log("UGN menu themed: original game actions preserved, original credits retained.");
+const globalFile = path.join(root, "src/styles.css");
+const backgroundCss = fs.readFileSync(new URL("./ugn-menu-background.css", import.meta.url), "utf8");
+fs.appendFileSync(globalFile, "\n" + backgroundCss + "\n");
+console.log("UGN menu themed: animated background, UGN Discord and original actions preserved.");
