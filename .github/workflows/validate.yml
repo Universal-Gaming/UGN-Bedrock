@@ -44,6 +44,6 @@ jobs:
           test -s scripts/install-mouse-controls.mjs
           grep -q 'game-mount' index.html
           grep -q 'space-scene' index.html
-          grep -q 'window.location.assign(url)' app.js
+          grep -q 'window.location.assign(gameUrl.href)' app.js
           ! grep -q 'createElement("iframe")' app.js
           grep -q 'UGN same-tab home navigation' scripts/theme-client.mjs
