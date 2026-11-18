@@ -1,10 +1,10 @@
 {
   "featuredServer": {
-    "enabled": false,
+    "enabled": true,
     "name": "[UGN] Universal Java",
-    "description": "The official UGN browser community server — coming after a compatible server and gateway are deployed.",
-    "host": "",
-    "port": 25565
+    "description": "The featured UGN Java Browser Edition server. A secure WebSocket relay is required for browser connections.",
+    "host": "play.universalgaming.us",
+    "port": 25578
   },
   "relay": {
     "url": ""
