@@ -103,6 +103,30 @@
     }
   }
 
+  async function removeOldGameServiceWorkers() {
+    // Older upstream builds could install a service worker under /client/.
+    // Unregister only those workers to avoid serving an obsolete game bundle.
+    // This does NOT clear IndexedDB, worlds, localStorage or account settings.
+    if (!navigator.serviceWorker?.getRegistrations) return;
+    try {
+      const gameRoot = new URL("./client/", document.baseURI);
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      const outdated = registrations.filter((registration) => {
+        const scripts = [
+          registration.active?.scriptURL,
+          registration.waiting?.scriptURL,
+          registration.installing?.scriptURL
+        ].filter(Boolean);
+        return registration.scope.startsWith(gameRoot.href) ||
+          scripts.some((script) => script.startsWith(gameRoot.href));
+      });
+      await Promise.all(outdated.map((registration) => registration.unregister()));
+      if (outdated.length) console.info("Unregistered outdated UGN client service worker(s):", outdated.length);
+    } catch (error) {
+      console.warn("Unable to check old game cache registration", error);
+    }
+  }
+
   async function openGame() {
     if (loading) return;
     loading = true;
@@ -113,11 +137,15 @@
     try {
       const { url } = await getBuild();
       if (!visible || request !== navigationId) return;
+      status.textContent = "PREPARING FRESH GAME CLIENT";
+      await removeOldGameServiceWorkers();
+      if (!visible || request !== navigationId) return;
+      const gameUrl = new URL(url);
+      // Force a fresh HTML entry document while retaining the same /client/
+      // origin and browser world saves. Upstream's chunk URLs remain hashed.
+      gameUrl.searchParams.set("ugn_refresh", String(Date.now()));
       status.textContent = "OPENING GAME IN THIS TAB";
-      // Deliberately do NOT embed another document. Firefox/Chromium mouse
-      // capture is more reliable when the game is the top-level document.
-      // Same origin and the same /client/ route preserve browser world storage.
-      window.location.assign(url);
+      window.location.assign(gameUrl.href);
     } catch (error) {
       if (visible) showMissing(error);
     } finally {
