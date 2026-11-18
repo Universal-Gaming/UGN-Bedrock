@@ -117,8 +117,9 @@
     setVisibility(true);
     if (frame) {
       frame.hidden = false;
-      status.textContent = "GAME VIEW OPEN";
+      status.textContent = "CLICK INSIDE THE GAME TO LOOK AROUND";
       placeholder.hidden = true;
+      frame.focus({ preventScroll: true });
       return;
     }
     if (loading) return;
@@ -131,14 +132,39 @@
       const iframe = document.createElement("iframe");
       iframe.id = "ugn-java-client";
       iframe.title = "UGN Java compatible browser game";
+      iframe.tabIndex = 0;
+      // Same-origin, unsandboxed client: browser mouse capture must be requested
+      // by an actual click INSIDE the game iframe, not by an outer-page click.
       iframe.src = url;
       iframe.allow = "fullscreen; gamepad; clipboard-read; clipboard-write";
       iframe.allowFullscreen = true;
       iframe.referrerPolicy = "same-origin";
       iframe.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;background:#050611;z-index:2";
       iframe.addEventListener("load", () => {
-        if (frame === iframe) status.textContent = "CLIENT PAGE LOADED";
-        // load does not attest that terrain rendering or multiplayer works.
+        if (frame !== iframe) return;
+        status.textContent = "CLICK INSIDE THE GAME TO LOOK AROUND";
+        // The game owns its keyboard and mouse focus. Focus here improves
+        // iframe keyboard routing without trying to bypass user activation.
+        iframe.focus({ preventScroll: true });
+        try {
+          const gameDoc = iframe.contentDocument;
+          if (!gameDoc) return;
+          gameDoc.addEventListener("pointerlockchange", () => {
+            if (!visible || frame !== iframe) return;
+            status.textContent = gameDoc.pointerLockElement
+              ? "MOUSE CAPTURED · ESC TO RELEASE"
+              : "CLICK INSIDE THE GAME TO LOOK AROUND";
+          });
+          gameDoc.addEventListener("pointerlockerror", () => {
+            if (visible && frame === iframe) {
+              status.textContent = "MOUSE CAPTURE BLOCKED · CLICK GAME AGAIN";
+            }
+          });
+        } catch (error) {
+          // The client is expected to be same-origin. If a future deployment
+          // changes that, it can still capture the pointer in its own document.
+          console.warn("Cannot observe game cursor-capture status", error);
+        }
       });
       iframe.addEventListener("error", () => {
         if (frame === iframe) frame = null;
