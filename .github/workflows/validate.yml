@@ -23,6 +23,8 @@ jobs:
           node --check app.js
           node --check scene.js
           node --check client-config.js
+          node --check scripts/theme-client.mjs
+          node --check scripts/configure-client.mjs
       - name: Validate required source files
         run: |
           test -s index.html
@@ -32,5 +34,7 @@ jobs:
           test -s client-config.js
           test -s THIRD_PARTY_NOTICES.md
           test -s .github/workflows/deploy-java.yml
+          test -s scripts/theme-client.mjs
+          test -s scripts/configure-client.mjs
           grep -q 'game-mount' index.html
           grep -q 'space-scene' index.html
