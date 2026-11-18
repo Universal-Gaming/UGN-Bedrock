@@ -8,6 +8,12 @@ on:
 permissions:
   contents: read
 
+# Only release protocols for which the pinned browser client contains
+# valid block/item definitions. Upstream has unsupported 26.x listings
+# that should not be advertised in UGN browser builds.
+env:
+  MAX_MC_VERSION: '1.21.5'
+
 concurrency:
   group: ugn-java-pages
   cancel-in-progress: false
