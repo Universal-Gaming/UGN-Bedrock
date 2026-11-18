@@ -148,6 +148,11 @@
   transform: translateY(-1px);
   outline: 1px solid #7cffd6;
 }
+.ugn-menu-home {
+  background: linear-gradient(105deg, rgba(31, 39, 81, .96), rgba(48, 47, 100, .96));
+  border-color: rgba(165, 154, 255, .65);
+  font-size: 9px;
+}
 @keyframes ugn-far-stars {from{background-position:0 0}to{background-position:-420px 420px}}
 @keyframes ugn-near-stars {from{background-position:0 0}to{background-position:580px -580px}}
 @keyframes ugn-nebula-breathe {from{opacity:.62;transform:scale(1)}to{opacity:.92;transform:scale(1.09)}}
