@@ -24,7 +24,7 @@ if (!camera.includes("export function onCameraMove (e: MouseEvent | CameraMoveEv
   throw new Error("Upstream camera move handler changed; refusing to patch.");
 }
 
-const component = String.raw\`
+const component = String.raw`
 
 // UGN browser mouse capture. This is shown only while actually playing.
 // It displays browser permission failures and provides a Shift+drag fallback.
@@ -170,7 +170,7 @@ document.addEventListener('mousemove', (event) => {
 
 document.addEventListener('mousedown', (event) => {
   if (!ugnPlaying() || document.pointerLockElement) return
-  if (event.shiftKey && event.button === 0 && !event.target?.closest?.('button,input,textarea,a')) {
+  if (event.shiftKey && event.button === 0 && !(event.target as HTMLElement)?.closest?.('button,input,textarea,a')) {
     // Shift+drag only activates if browser capture is unavailable.
     ugnDragging = true
     ugnLastX = event.clientX
@@ -182,23 +182,23 @@ window.addEventListener('mouseup', () => { ugnDragging = false })
 window.addEventListener('blur', () => { ugnDragging = false })
 document.addEventListener('pointerlockchange', () => { ugnDragging = false })
 window.setInterval(ugnUpdateCaptureHud, 450)
-\`;
+`;
 
 controls += component;
 
 const handlerStart = "export function onCameraMove (e: MouseEvent | CameraMoveEvent) {\n";
-const handlerNew = \`export function onCameraMove (e: MouseEvent | CameraMoveEvent) {
+const handlerNew = `export function onCameraMove (e: MouseEvent | CameraMoveEvent) {
   const ugnMouseStats = (window as any).UGNMouseDiagnostics
-\`;
+`;
 if(camera.split(handlerStart).length!==2) throw new Error("Camera handler location changed");
 camera = camera.replace(handlerStart, handlerNew);
 const target = "  bot.mouse.update()\n  updateMotion()";
 if(camera.split(target).length!==2) throw new Error("Camera update block changed");
-camera = camera.replace(target, \`  if (ugnMouseStats) ugnMouseStats.cameraUpdates++
+camera = camera.replace(target, `  if (ugnMouseStats) ugnMouseStats.cameraUpdates++
   bot.mouse.update()
-  updateMotion()\`);
+  updateMotion()`);
 
-const css = String.raw\`
+const css = String.raw`
 
 /* Scoped UGN in-game mouse capture feedback, outside inventory & hotbar */
 .ugn-mouse-capture {
@@ -243,7 +243,7 @@ const css = String.raw\`
   .ugn-mouse-capture-button { font-size: 10px; padding: 6px; }
   .ugn-mouse-capture-status { font-size: 8px; }
 }
-\`;
+`;
 
 fs.writeFileSync(controlsFile, controls);
 fs.writeFileSync(cameraFile, camera);
