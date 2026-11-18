@@ -26,6 +26,7 @@ jobs:
           node --check scripts/theme-client.mjs
           node --check scripts/configure-client.mjs
           node --check scripts/fix-mouse-look.mjs
+          node --check scripts/test-mouse-look.mjs
       - name: Validate required source files
         run: |
           test -s index.html
@@ -38,5 +39,6 @@ jobs:
           test -s scripts/theme-client.mjs
           test -s scripts/configure-client.mjs
           test -s scripts/fix-mouse-look.mjs
+          test -s scripts/test-mouse-look.mjs
           grep -q 'game-mount' index.html
           grep -q 'space-scene' index.html
