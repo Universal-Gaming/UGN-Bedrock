@@ -78,6 +78,11 @@ jobs:
           node ugn/scripts/install-mouse-controls.mjs upstream
           node --check ugn/scripts/polish-mouse-capture.mjs
           node ugn/scripts/polish-mouse-capture.mjs upstream
+          node --check ugn/scripts/restore-block-interactions.mjs
+          node ugn/scripts/restore-block-interactions.mjs upstream
+          node --check ugn/scripts/test-block-interactions.mjs
+          node ugn/scripts/test-block-interactions.mjs upstream
+          grep -q 'UGNMouseDiagnostics?.fallbackActive' upstream/src/mineflayer/plugins/mouse.ts
           grep -q "onGamePointerDown" upstream/src/react/GlobalOverlayHints.tsx
           grep -q "const [hasClickedGame, setHasClickedGame]" upstream/src/react/GlobalOverlayHints.tsx
           grep -q "ugnTryCapture()" upstream/src/controls.ts
