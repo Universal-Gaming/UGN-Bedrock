@@ -46,8 +46,24 @@ const existingForced = config.forceSettings || {};
 // GitHub Pages can lack headers needed by the WASM worker path on some browsers.
 // Start with the renderer's supported JavaScript mesher; override previously saved
 // WASM preferences via the native appConfig forceSettings mechanism.
-config.defaultSettings = { ...existingSettings, rendererMesher: "legacy-js" };
-config.forceSettings = { ...existingForced, rendererMesher: true };
+// Empty string means "use the connected world's Minecraft version" in
+// src/index.ts and ResourcesManager: texturesVersion defaults to version.
+// The upstream default "latest" instead uses newer texture mappings for 1.19.4.
+config.defaultSettings = {
+  ...existingSettings,
+  rendererMesher: "legacy-js",
+  useVersionsTextures: "",
+  disableAssets: false,
+  enabledResourcepack: null
+};
+config.forceSettings = {
+  ...existingForced,
+  rendererMesher: true,
+  useVersionsTextures: true,
+  disableAssets: true
+};
+// Don't force enabledResourcepack: allow players to use their own packs.
+// On launch, a saved pack can be removed from Game Settings if corrupt.
 
 config.pauseLinks=[
   [
