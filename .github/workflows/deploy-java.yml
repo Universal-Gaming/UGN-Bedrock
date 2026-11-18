@@ -65,6 +65,9 @@ jobs:
         working-directory: upstream
         env:
           CI: 'true'
+          GITHUB_REPOSITORY: 'Universal-Gaming/UGN-Bedrock'
+          MAIN_MENU_LINKS: 'UGN GitHub:https://github.com/Universal-Gaming/UGN-Bedrock;UGN Website:https://universalgaming.us/'
+          CONFIG_JSON_SOURCE: 'BUNDLED'
           GENDATA_EXT_URL: 'off'
           DISABLE_SERVICE_WORKER: 'true'
         run: pnpm build
@@ -73,6 +76,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node ugn/scripts/verify-game-assets.mjs upstream
           test -s upstream/dist/index.html
           mkdir -p public/client
           cp -a upstream/dist/. public/client/
