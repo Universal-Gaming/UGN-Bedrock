@@ -41,6 +41,9 @@ const ugnMouseStats = {
 ;(window as any).UGNMouseDiagnostics = ugnMouseStats
 
 let ugnDragging = false
+let ugnFreeLook = false
+let ugnPreviousMouseX: number | undefined
+let ugnPreviousMouseY: number | undefined
 let ugnLastX = 0
 let ugnLastY = 0
 let ugnWidget: HTMLDivElement | undefined
@@ -65,19 +68,23 @@ function ugnUpdateCaptureHud () {
   ugnMouseStats.lockGranted = hasLock
   if (ugnButton) ugnButton.style.display = hasLock ? 'none' : 'block'
   if (hasLock) {
+    ugnFreeLook = false
     if (ugnMouseStats.nonZeroMouseEvents && !ugnMouseStats.cameraUpdates) {
       ugnCaptureStatus('CURSOR LOCKED · CHECK CAMERA INPUT')
     } else {
       ugnCaptureStatus('MOUSE LOCKED · ESC TO RELEASE')
     }
+  } else if (ugnFreeLook) {
+    ugnCaptureStatus('FREE LOOK ACTIVE · MOVE MOUSE (ESC TO STOP)')
   } else if (!ugnCapturePending && !ugnMouseStats.lastError) {
-    ugnCaptureStatus('CLICK TO CAPTURE · SHIFT+DRAG FALLBACK')
+    ugnCaptureStatus('CLICK TO CAPTURE · DRAG TO LOOK IF BLOCKED')
   }
 }
 
 function ugnTryCapture () {
   if (!ugnPlaying()) return
   ugnMouseStats.captureAttempts += 1
+  ugnFreeLook = false
   ugnMouseStats.lastError = ''
   ugnCapturePending = true
   ugnCaptureStatus('REQUESTING MOUSE CONTROL…')
@@ -90,7 +97,10 @@ function ugnTryCapture () {
       if (!ugnMouseStats.lastError) {
         ugnMouseStats.lastError = 'Capture not granted'
       }
-      ugnCaptureStatus('MOUSE LOCK DENIED · SHIFT+DRAG TO LOOK')
+      ugnFreeLook = true
+      ugnPreviousMouseX = undefined
+      ugnPreviousMouseY = undefined
+      ugnCaptureStatus('FREE LOOK ACTIVE · MOVE MOUSE (ESC TO STOP)')
     }
     ugnUpdateCaptureHud()
   }, 650)
@@ -119,7 +129,7 @@ function ugnMountCaptureHud () {
   caption.className = 'ugn-mouse-capture-status'
   caption.setAttribute('role', 'status')
   caption.setAttribute('aria-live', 'polite')
-  caption.textContent = 'CLICK TO CAPTURE · SHIFT+DRAG FALLBACK'
+  caption.textContent = 'CLICK TO CAPTURE · DRAG TO LOOK IF BLOCKED'
   box.append(button, caption)
   document.body.appendChild(box)
   ugnWidget = box
@@ -139,8 +149,11 @@ document.addEventListener('pointerlockchange', () => {
 document.addEventListener('pointerlockerror', () => {
   ugnCapturePending = false
   ugnMouseStats.lockErrors++
+  ugnFreeLook = true
+  ugnPreviousMouseX = undefined
+  ugnPreviousMouseY = undefined
   ugnMouseStats.lastError = 'Browser denied pointer lock'
-  ugnCaptureStatus('BROWSER BLOCKED LOCK · SHIFT+DRAG TO LOOK')
+  ugnCaptureStatus('BROWSER BLOCKED LOCK · FREE LOOK ACTIVE')
   ugnUpdateCaptureHud()
 })
 
@@ -150,8 +163,27 @@ document.addEventListener('mousemove', (event) => {
   if (event.movementX !== 0 || event.movementY !== 0) {
     ugnMouseStats.nonZeroMouseEvents++
   }
-  // Fallback works with mouse capture denied, without modifying keybinds,
-  // inventory controls, or the existing camera handler.
+  // Free-look fallback: the cursor stays visible and reaches the screen edge,
+  // but the camera follows mouse movement even when the browser denies lock.
+  // Do not rotate when menus are open or the pointer is over UI controls.
+  if (ugnFreeLook && !document.pointerLockElement && !ugnDragging) {
+    const target = event.target as HTMLElement | null
+    const overControls = target?.closest?.('button,a,input,textarea,select,[role="dialog"],.ugn-mouse-capture')
+    const dx = event.movementX || (ugnPreviousMouseX === undefined ? 0 : event.clientX - ugnPreviousMouseX)
+    const dy = event.movementY || (ugnPreviousMouseY === undefined ? 0 : event.clientY - ugnPreviousMouseY)
+    ugnPreviousMouseX = event.clientX
+    ugnPreviousMouseY = event.clientY
+    if (!overControls && (dx || dy)) {
+      ugnMouseStats.dragUpdates++
+      onCameraMove({
+        type: 'ugn-free-look',
+        movementX: Math.max(-70, Math.min(70, dx)),
+        movementY: Math.max(-70, Math.min(70, dy)),
+        stopPropagation () {}
+      })
+    }
+  }
+  // Shift+drag still works even when the user has not enabled free-look mode.
   if (ugnDragging && !document.pointerLockElement) {
     const dx = event.clientX - ugnLastX
     const dy = event.clientY - ugnLastY
@@ -179,6 +211,13 @@ document.addEventListener('mousedown', (event) => {
   }
 }, { capture: true })
 window.addEventListener('mouseup', () => { ugnDragging = false })
+window.addEventListener('keydown', (event) => {
+  if (event.code !== 'Escape') return
+  ugnFreeLook = false
+  ugnPreviousMouseX = undefined
+  ugnPreviousMouseY = undefined
+  ugnUpdateCaptureHud()
+})
 window.addEventListener('blur', () => { ugnDragging = false })
 document.addEventListener('pointerlockchange', () => { ugnDragging = false })
 window.setInterval(ugnUpdateCaptureHud, 450)
