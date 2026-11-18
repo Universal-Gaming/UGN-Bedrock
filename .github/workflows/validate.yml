@@ -1,27 +1,36 @@
-name: Validate UGN Bedrock foundation
+name: Validate UGN Java source
+
 on:
   push:
     branches: [main]
   pull_request:
+
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate browser and gateway JavaScript
+      - name: Validate JavaScript syntax
         run: |
-          node --check config.js
           node --check app.js
-          node --check gateway/server.mjs
-      - name: Validate required site files
+          node --check scene.js
+          node --check client-config.js
+      - name: Validate required source files
         run: |
           test -s index.html
           test -s styles.css
           test -s app.js
-          test -s config.js
-          test -s gateway/server.mjs
+          test -s scene.js
+          test -s client-config.js
+          test -s THIRD_PARTY_NOTICES.md
+          test -s .github/workflows/deploy-java.yml
+          grep -q 'game-mount' index.html
+          grep -q 'space-scene' index.html
