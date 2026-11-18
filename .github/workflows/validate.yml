@@ -30,6 +30,7 @@ jobs:
           node --check scripts/test-mouse-look.mjs
           node --check scripts/install-mouse-controls.mjs
           node --check scripts/verify-pages-output.mjs
+          node --check scripts/fix-server-connection.mjs
       - name: Validate required source files
         run: |
           test -s index.html
@@ -48,6 +49,7 @@ jobs:
           test -s scripts/test-mouse-look.mjs
           test -s scripts/install-mouse-controls.mjs
           test -s scripts/verify-pages-output.mjs
+          test -s scripts/fix-server-connection.mjs
           grep -q 'ugn-free-look' scripts/install-mouse-controls.mjs
           grep -q 'game-mount' index.html
           grep -q 'space-scene' index.html
