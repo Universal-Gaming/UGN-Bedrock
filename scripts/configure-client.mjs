@@ -10,7 +10,7 @@ const custom=JSON.parse(fs.readFileSync(input,"utf8"));
 const hostOk=(host)=>typeof host==="string" && host.length<=253 &&
   (net.isIP(host)===4 || /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/i.test(host) && host.includes("."));
 const portOk=(n)=>Number.isInteger(Number(n)) && Number(n)>0 && Number(n)<=65535;
-const urlOk=(s)=>typeof s==="string" && /^wss:\/\/[a-z0-9.-]+(?::\d{2,5})?(?:\/[a-z0-9/_-]*)?$/i.test(s);
+const urlOk=(s)=>typeof s==="string" && /^(?:https|wss):\/\/[a-z0-9.-]+(?::\d{2,5})?(?:\/[a-z0-9/_-]*)?$/i.test(s);
 const featured=custom.featuredServer || {};
 const displayed=[];
 if(featured.enabled){
@@ -43,7 +43,7 @@ config.splashText="ONE NETWORK. YOUR NEXT ADVENTURE.";
 config.splashTextFallback="WELCOME TO UGN JAVA.";
 const relay=custom.relay?.url || "";
 if(relay){
-  if(!urlOk(relay))throw new Error("Relay must be a wss:// URL pointing to your controlled service.");
+  if(!urlOk(relay))throw new Error("Relay must be an https:// or wss:// URL pointing to your controlled service.");
   config.defaultProxy=relay;
   config.defaultProxies=[relay];
 }
