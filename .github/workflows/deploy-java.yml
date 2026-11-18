@@ -56,6 +56,11 @@ jobs:
           node ugn/scripts/configure-client.mjs upstream ugn/server-config.json
           node -e "const c=require('./upstream/config.json'); if(!Array.isArray(c.promoteServers)) process.exit(1); console.log('UGN promoted server count:',c.promoteServers.length)"
 
+      - name: Apply UGN in-game main menu theme
+        run: |
+          node --check ugn/scripts/theme-client.mjs
+          node ugn/scripts/theme-client.mjs upstream
+
       - name: Build genuine Java-compatible browser client
         working-directory: upstream
         env:
