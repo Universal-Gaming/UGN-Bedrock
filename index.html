@@ -3,112 +3,138 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#070d1a">
-  <meta name="description" content="UGN Java — browser-based block-building adventures with a real Java-compatible web client. Play directly on the page.">
+  <meta name="theme-color" content="#070b18">
+  <meta name="description" content="UGN Java MC Browser Edition. A real Java-compatible Minecraft browser client. No launcher. Your world starts here.">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
-  <title>UGN Java — Play in Your Browser</title>
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <link rel="stylesheet" href="./styles.css">
+  <title>UGN Java | MC Browser Edition</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./landing.css">
   <script src="./scene.js" defer></script>
   <script src="./client-config.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
 <body>
-  <div id="experience" class="experience">
-    <canvas id="space-scene" aria-label="Interactive UGN three-dimensional space environment"></canvas>
-    <div class="fallback-sky" aria-hidden="true"></div>
-    <div class="vignette" aria-hidden="true"></div>
-    <div class="grain" aria-hidden="true"></div>
+  <div class="startup" id="startup" aria-hidden="true">
+    <div class="startup-graticule"></div>
+    <div class="startup-center">
+      <div class="startup-logo">U<span>G</span>N</div>
+      <div class="startup-sub">UNIVERSAL GAMING NETWORK</div>
+      <div class="startup-track"><span></span></div>
+      <div class="startup-caption">JAVA / MC BROWSER EDITION</div>
+    </div>
+    <div class="startup-corner">SYSTEM INITIALIZING / 001</div>
+  </div>
+
+  <div class="experience" id="experience">
+    <div class="stars stars-back" aria-hidden="true"></div>
+    <div class="stars stars-front" aria-hidden="true"></div>
+    <div class="nebula" aria-hidden="true"></div>
+    <canvas id="space-scene" aria-label="Interactive three-dimensional UGN cosmic block-built outpost" role="img"></canvas>
+    <div class="scene-shade" aria-hidden="true"></div>
+    <div class="scene-scanlines" aria-hidden="true"></div>
 
     <header class="masthead">
-      <a class="brand" href="#home" aria-label="UGN Java home">
-        <span class="brand-mark" aria-hidden="true">U<span>G</span>N</span>
-        <span class="brand-divider"></span>
-        <span class="brand-copy"><strong>JAVA</strong><small>UNIVERSAL GAMING NETWORK</small></span>
+      <a href="#home" class="brand" aria-label="UGN Java home">
+        <span class="brand-symbol">U<span>G</span>N</span>
+        <span class="brand-rule" aria-hidden="true"></span>
+        <span class="brand-words"><strong>JAVA</strong><small>MC BROWSER EDITION</small></span>
       </a>
-      <nav class="topnav" aria-label="Site navigation">
-        <a class="topnav-active" href="#home">Play</a>
-        <a href="#details">About</a>
-        <a href="https://discord.universalgaming.us/" target="_blank" rel="noopener noreferrer">Community ↗</a>
+      <nav class="site-nav" aria-label="Main">
+        <a class="selected" href="#home">PLAY</a>
+        <a href="#featured">UGN WORLD</a>
+        <a href="https://discord.universalgaming.us/" target="_blank" rel="noopener noreferrer">DISCORD ↗</a>
       </nav>
-      <div class="masthead-right">
-        <span class="status-pill"><span class="status-light"></span><span id="client-readiness">CHECKING CLIENT</span></span>
-        <button class="icon-button" id="info-button" type="button" aria-label="Project details" title="Project details">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
-        </button>
+      <div class="masthead-actions">
+        <span class="client-tag" id="client-readiness" role="status">CHECKING CLIENT</span>
+        <button class="about-control" id="info-button" type="button" aria-label="About UGN Java">?</button>
       </div>
     </header>
 
     <main id="home" class="hero">
-      <div class="hero-content">
-        <span class="hero-kicker"><span class="kicker-star">✦</span> UGN BROWSER EDITION <span class="kicker-rule"></span> JAVA</span>
-        <h1 class="home-title">PLAY JAVA.<br><span>ANYWHERE.</span></h1>
-        <p class="tagline">ONE BROWSER. <span>ENDLESS ADVENTURES.</span></p>
-        <p class="hero-description">Build, explore and play right inside the page. No separate launcher, no required Microsoft sign-in on the UGN website, and no fake Minecraft gameplay.</p>
-        <div class="hero-cta">
-          <button id="enter-button" type="button" class="enter-button"><span class="enter-icon" aria-hidden="true">▶</span><span>PLAY NOW <small>OPEN THE GAME IN THIS PAGE</small></span><span class="enter-arrow" aria-hidden="true">↗</span></button>
-          <span class="cta-note"><span class="tiny-pulse"></span> JAVA-COMPATIBLE OPEN-SOURCE WEB CLIENT</span>
+      <div class="hero-copy">
+        <div class="overline"><span class="overline-diamond">◆</span> UNIVERSAL GAMING NETWORK <i></i> BROWSER EDITION</div>
+        <div class="title-stack">
+          <div class="title-top">THE WORLD</div>
+          <h1>IS <span>YOURS.</span></h1>
+          <div class="hero-title-code">UGN JAVA <span class="code-slash">/</span> MC BROWSER EDITION</div>
         </div>
-        <div class="game-support-line"><span>SUPPORTED BY UPSTREAM:</span><strong>1.8 – 1.21.5</strong><span class="support-separator"></span><span>LATEST OFFICIAL:</span><strong>26.3 <em>NOT YET SUPPORTED</em></strong></div>
+        <p class="intro">Real Java-compatible gameplay, right in your tab. Build a world, explore on your own, or join a compatible server. No download. No separate launcher.</p>
+        <div class="hero-actions">
+          <button class="play-now" type="button" id="enter-button">
+            <span class="play-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M11 6 26 16 11 26Z" fill="currentColor"/></svg></span>
+            <span class="play-text"><strong>PLAY IN BROWSER</strong><small>OPEN THE GAME IN THIS PAGE</small></span>
+            <span class="play-arrow" aria-hidden="true">↗</span>
+          </button>
+          <div class="play-adjacent"><span class="signal-dot"></span><span id="portal-client-status">CHECKING GAME FILES</span></div>
+        </div>
+        <div class="hero-details">
+          <div><span>ENGINE</span><strong>JAVA WEB CLIENT</strong></div>
+          <div><span>ADVERTISED VERSIONS</span><strong>1.8 – 1.21.5</strong></div>
+          <div><span>JAVA 26.3</span><strong class="not-yet">NOT YET COMPATIBLE</strong></div>
+        </div>
       </div>
 
-      <aside class="portal-card" aria-label="Game availability and capabilities">
-        <div class="portal-card-top"><span class="portal-tag"><span class="tag-dot"></span> UGN • JAVA EDITION</span><span class="portal-number">001 / ∞</span></div>
-        <div class="portal-card-middle"><span class="portal-glyph" aria-hidden="true">◇</span><div><span class="portal-label">READY FOR THE NEXT WORLD?</span><strong>ENTER THE<br>UNIVERSE.</strong><p>Play directly in the browser with the compiled Java-compatible client.</p></div></div>
-        <div class="portal-card-bottom"><div><span>GAME CLIENT</span><strong id="portal-client-status">Checking deployment…</strong></div><div><span>PLATFORM</span><strong>Browser / Cross-device</strong></div></div>
-      </aside>
+      <div class="outpost-label" aria-hidden="true">
+        <span class="outpost-line"></span>
+        <span>UGN / ORBITAL OUTPOST</span>
+        <strong>SECTOR 001</strong>
+        <small>DRAG BACKGROUND TO ROTATE</small>
+      </div>
+      <div class="side-rail" aria-hidden="true"><span>UGN // 001</span><i></i><span>EST. UNIVERSAL GAMING</span></div>
     </main>
 
-    <div id="details" class="quick-features" aria-label="Game features">
-      <div><span class="quick-symbol">◈</span><div><strong>PLAY IN THE PAGE</strong><small>Runs inside the browser</small></div></div>
-      <div><span class="quick-symbol">▣</span><div><strong>SINGLEPLAYER</strong><small>Local worlds where supported</small></div></div>
-      <div><span class="quick-symbol">⌘</span><div><strong>MULTIPLAYER</strong><small>Secure relay required</small></div></div>
-      <div><span class="quick-symbol">✧</span><div><strong>ALL YOUR DEVICES</strong><small>Desktop, mobile and tablet</small></div></div>
-    </div>
+    <section id="featured" class="featured">
+      <div class="featured-left">
+        <div class="feature-icon"><span>UGN</span></div>
+        <div>
+          <span class="featured-overline">FEATURED WORLD / YOUR COMMUNITY</span>
+          <h2 id="featured-name">Universal Gaming Network</h2>
+          <p id="featured-description">Your UGN Java server can be featured here when its compatible endpoint is ready.</p>
+        </div>
+      </div>
+      <div class="featured-right">
+        <span class="feature-state" id="featured-state"><i></i> SETUP PENDING</span>
+        <span class="featured-host" id="featured-host">ADD YOUR SERVER IN CONFIG</span>
+      </div>
+    </section>
 
-    <footer class="scene-footer">
-      <span>UNOFFICIAL, INDEPENDENT WEB CLIENT • NOT AFFILIATED WITH MOJANG OR MICROSOFT</span>
-      <span class="scene-controls"><span class="mouse-icon">⟡</span> DRAG TO EXPLORE THE 3D PORTAL</span>
-      <a class="ugn-link" href="https://universalgaming.us/" rel="noopener noreferrer" target="_blank">UNIVERSAL GAMING ↗</a>
+    <footer class="footer">
+      <div class="footer-motto">ONE NETWORK. <span>YOUR NEXT ADVENTURE.</span></div>
+      <div class="footer-note">INDEPENDENT COMMUNITY PROJECT · NOT AFFILIATED WITH MOJANG OR MICROSOFT</div>
+      <a href="https://universalgaming.us/" target="_blank" rel="noopener noreferrer">UNIVERSALGAMING.US ↗</a>
     </footer>
   </div>
 
-  <section id="game-space" class="game-space" hidden aria-label="In-page Java browser game">
+  <section id="game-space" class="game-space" hidden aria-label="UGN Java browser gameplay">
     <div class="game-topbar">
-      <div class="game-brand"><span>UGN</span><strong>JAVA</strong><small> / BROWSER EDITION</small></div>
+      <div class="game-brand"><span>UGN</span><strong>JAVA</strong><small> / MC BROWSER EDITION</small></div>
       <div class="game-actions">
-        <span class="game-status" id="game-status" role="status" aria-live="polite">PREPARING GAME</span>
-        <button class="icon-button" id="game-fullscreen" type="button" aria-label="Toggle full-screen game">⛶</button>
-        <button class="close-game" id="exit-button" type="button" aria-label="Return to UGN home">×</button>
+        <span class="game-status" id="game-status" role="status" aria-live="polite">PREPARING CLIENT</span>
+        <button id="game-fullscreen" class="game-control" type="button" aria-label="Toggle game fullscreen">⛶</button>
+        <button id="exit-button" class="close-game" type="button" aria-label="Return to homepage">×</button>
       </div>
     </div>
-    <div id="game-mount" class="game-mount">
+    <div id="game-mount" class="game-mount" aria-label="Live Java-compatible browser game client">
       <div id="engine-placeholder" class="engine-placeholder">
-        <div class="engine-emblem" aria-hidden="true">◇</div>
-        <span class="eyebrow engine-eyebrow">UGN / BROWSER EDITION</span>
-        <h2>YOUR WORLD.<br><em>IN YOUR BROWSER.</em></h2>
-        <p>Checking for the independently developed Java-compatible web client. If the build is unavailable, you'll see a clear error instead of fake gameplay.</p>
-        <div class="milestones" role="list">
-          <span role="listitem"><i class="ready"></i> WEBSITE / READY</span>
-          <span role="listitem"><i></i> CLIENT / VERIFYING</span>
-          <span role="listitem"><i></i> MULTIPLAYER / RELAY REQUIRED</span>
-        </div>
-        <button id="placeholder-exit" class="return-button" type="button">RETURN HOME <span aria-hidden="true">↗</span></button>
+        <div class="loading-logo">U<span>G</span>N</div>
+        <span class="loading-label">JAVA / MC BROWSER EDITION</span>
+        <h2>BUILD YOUR<br><em>OWN WORLD.</em></h2>
+        <p>Looking for the compiled Java browser client. Actual gameplay starts here when the game files have been deployed.</p>
+        <div class="loading-track"><i></i></div>
+        <button type="button" id="placeholder-exit" class="back-button">BACK TO HOMEPAGE</button>
       </div>
     </div>
-    <div class="game-bottom-bar"><span>UGN JAVA // REAL BROWSER CLIENT</span><span>SUPPORTED VERSIONS DEPEND ON THE OPEN-SOURCE CLIENT</span></div>
+    <div class="game-bottom-bar"><span>UGN JAVA / YOUR WORLD. YOUR RULES.</span><span>ONLINE SERVERS REQUIRE A COMPATIBLE WEBSOCKET RELAY</span></div>
   </section>
 
   <dialog id="information" class="info-dialog">
-    <div class="dialog-heading"><span>UGN / BROWSER EDITION</span><button id="info-close" type="button" aria-label="Close project details">×</button></div>
-    <span class="dialog-orbit" aria-hidden="true">◇</span>
-    <h2>YOUR WORLD.<br>ONE TAB.</h2>
-    <p>UGN Java packages the independently developed, MIT-licensed Minecraft Web Client behind a custom interactive space-themed page. This project is not the official Minecraft Java client and does not distribute Eaglercraft's original game port.</p>
-    <p>As of November 18, 2026, official Minecraft Java is at version 26.3. The integrated browser client's advertised support is 1.8–1.21.5, so 26.3 multiplayer and its new blocks are not yet available. The public website does not require a Microsoft account. Multiplayer on compatible offline-mode servers requires a separate WebSocket-to-TCP relay and strong username protection; online-mode authentication is a separate flow.</p>
-    <p>The independent client may save worlds or preferences to your browser. Review its separate data handling before public launch.</p>
-    <a class="dialog-link" href="https://github.com/Universal-Gaming/UGN-Bedrock" rel="noopener noreferrer" target="_blank">VIEW SOURCE ↗</a>
+    <div class="dialog-heading"><strong>UGN JAVA · MC BROWSER EDITION</strong><button id="info-close" type="button" aria-label="Close">×</button></div>
+    <h2>YOUR WORLD.<br><span>ONE BROWSER.</span></h2>
+    <p>UGN uses an independently developed MIT-licensed Java-compatible browser client, presented inside a custom UGN animated 3D homepage. This is not the official Minecraft Java client or an APK emulator.</p>
+    <p>Currently advertised support is Java 1.8–1.21.5. The newest official 26.3 features are not supported yet. UGN Java multiplayer needs a secure separately hosted relay and compatible server. You can set up your own featured UGN endpoint in the project configuration.</p>
+    <p>The homepage does not request Microsoft account credentials. The embedded open-source game client manages its own optional settings and local browser data.</p>
+    <a class="repo-link" href="https://github.com/Universal-Gaming/UGN-Bedrock" target="_blank" rel="noopener noreferrer">VIEW THE PROJECT ON GITHUB ↗</a>
   </dialog>
 </body>
 </html>
