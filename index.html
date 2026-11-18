@@ -4,13 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#070817">
-  <meta name="description" content="UGN Bedrock — an immersive Minecraft Bedrock browser client in development. No launcher. Just the world.">
+  <meta name="description" content="UGN Java — an immersive Minecraft Java browser client in development. No launcher. Just the world.">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
-  <title>UGN BEDROCK — Enter the Universe</title>
+  <title>UGN JAVA — Enter the Universe</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./styles.css">
   <script src="./scene.js" defer></script>
+  <script src="./client-config.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
 <body>
@@ -21,13 +22,13 @@
     <div class="grain" aria-hidden="true"></div>
 
     <header class="masthead">
-      <a class="brand" href="#home" aria-label="UGN Bedrock home">
+      <a class="brand" href="#home" aria-label="UGN Java home">
         <span class="brand-mark" aria-hidden="true">U<span>G</span>N</span>
         <span class="brand-divider"></span>
-        <span class="brand-copy"><strong>BEDROCK</strong><small>UNIVERSAL GAMING NETWORK</small></span>
+        <span class="brand-copy"><strong>JAVA</strong><small>UNIVERSAL GAMING NETWORK</small></span>
       </a>
       <div class="masthead-right">
-        <span class="status-pill"><span class="status-light"></span> ENGINE IN DEVELOPMENT</span>
+        <span class="status-pill"><span class="status-light"></span> JAVA BROWSER EDITION</span>
         <button class="icon-button" id="sound-button" type="button" aria-label="Sound disabled" title="Audio is not yet connected" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m17 9 4 6m0-6-4 6"/></svg>
         </button>
@@ -37,22 +38,22 @@
       </div>
     </header>
 
-    <main id="home" class="hero" aria-label="UGN Bedrock experience">
+    <main id="home" class="hero" aria-label="UGN Java experience">
       <div class="hero-content">
         <div class="eyebrow"><span class="eyebrow-glyph">✦</span> BEYOND THE ORDINARY <span class="eyebrow-line"></span> UGN / 001</div>
-        <h1><span class="title-outline">UGN</span><br><span class="title-gradient">BEDROCK</span><span class="title-period">.</span></h1>
+        <h1><span class="title-outline">UGN</span><br><span class="title-gradient">JAVA</span><span class="title-period">.</span></h1>
         <p class="tagline">YOUR WORLD.<br><span>NO BOUNDARIES.</span></p>
-        <p class="hero-description">One extraordinary place for Minecraft Bedrock — directly in your browser. No launcher, no install, no imitation gameplay.</p>
+        <p class="hero-description">One extraordinary place for Minecraft Java — directly in your browser. Real Java Edition-compatible gameplay in your browser, powered by an independently developed open-source client.</p>
         <div class="hero-cta">
           <button id="enter-button" class="enter-button" type="button"><span class="enter-icon">◇</span><span>ENTER GAME SPACE <small>OPEN THE IN-PAGE CLIENT</small></span><span class="enter-arrow">↗</span></button>
-          <span class="cta-note"><span class="tiny-pulse"></span> BROWSER ENGINE: NOT YET PLAYABLE</span>
+          <span class="cta-note"><span class="tiny-pulse"></span> JAVA CLIENT / SELF-HOSTED BUILD</span>
         </div>
       </div>
-      <div class="coordinates" aria-hidden="true"><span>UGN // PORTAL ARRAY</span><strong>01 / ∞</strong><span>AN IMMERSIVE EXPERIENCE</span></div>
+      <div class="coordinates" aria-hidden="true"><span>UGN // PORTAL ARRAY</span><strong>JAVA / WEB</strong><span>AN IMMERSIVE EXPERIENCE</span></div>
     </main>
 
     <div class="edge-data edge-left" aria-hidden="true"><span>UNIVERSAL NETWORK</span><span>EST. UGN</span></div>
-    <div class="edge-data edge-right" aria-hidden="true"><span>DIMENSION 001</span><span>BEDROCK / WEB</span></div>
+    <div class="edge-data edge-right" aria-hidden="true"><span>DIMENSION 001</span><span>JAVA / WEB</span></div>
 
     <footer class="scene-footer">
       <div class="scene-controls"><span class="mouse-icon">⟡</span><span>DRAG TO ORBIT</span><span class="control-separator">/</span><span>SCROLL TO ZOOM</span></div>
@@ -63,33 +64,33 @@
 
   <section id="game-space" class="game-space" hidden aria-label="Browser game workspace">
     <div class="game-topbar">
-      <div class="game-brand"><span>UGN</span><strong>BEDROCK</strong><small> / WEB ENGINE</small></div>
-      <div class="game-actions"><span class="game-status" id="game-status">RUNTIME NOT INSTALLED</span><button class="icon-button" id="game-fullscreen" type="button" title="Fullscreen game workspace" aria-label="Toggle fullscreen game workspace">⛶</button><button class="close-game" id="exit-button" type="button" aria-label="Return to 3D environment">×</button></div>
+      <div class="game-brand"><span>UGN</span><strong>JAVA</strong><small> / WEB ENGINE</small></div>
+      <div class="game-actions"><span class="game-status" id="game-status">CLIENT NOT LOADED</span><button class="icon-button" id="game-fullscreen" type="button" title="Fullscreen game workspace" aria-label="Toggle fullscreen game workspace">⛶</button><button class="close-game" id="exit-button" type="button" aria-label="Return to 3D environment">×</button></div>
     </div>
-    <div id="game-mount" class="game-mount" aria-label="Reserved canvas surface for real Bedrock gameplay">
+    <div id="game-mount" class="game-mount" aria-label="In-page Java browser game client">
       <div id="engine-placeholder" class="engine-placeholder">
         <div class="engine-emblem" aria-hidden="true">◇</div>
-        <span class="eyebrow engine-eyebrow">UGN / BEDROCK ENGINE</span>
-        <h2>THE NEXT WORLD<br><em>STARTS HERE.</em></h2>
-        <p>The game workspace is in place. Genuine Bedrock rendering, multiplayer networking, and Microsoft/Xbox authorization have not been integrated yet.</p>
+        <span class="eyebrow engine-eyebrow">UGN / JAVA ENGINE</span>
+        <h2>YOUR WORLD.<br><em>IN YOUR BROWSER.</em></h2>
+        <p>The independently developed Java browser client will load here from this site's own /client/ build. Singleplayer can work without a separate launcher; public multiplayer requires a WebSocket-to-TCP relay and compatible servers.</p>
         <div class="milestones" role="list">
-          <span role="listitem"><i class="ready"></i> WEBSITE / READY</span>
-          <span role="listitem"><i></i> ENGINE / PENDING</span>
-          <span role="listitem"><i></i> AUTH / PENDING</span>
+          <span role="listitem"><i class="ready"></i> 3D WEBSITE / READY</span>
+          <span role="listitem"><i></i> CLIENT / BUILD REQUIRED</span>
+          <span role="listitem"><i></i> MULTIPLAYER / RELAY</span>
         </div>
         <button class="return-button" id="placeholder-exit" type="button">RETURN TO THE UNIVERSE <span>↗</span></button>
       </div>
     </div>
-    <div class="game-bottom-bar"><span>UGN BEDROCK // DIRECT BROWSER GAMEPLAY</span><span>FOUNDATION RELEASE · NO SIMULATED MINECRAFT</span></div>
+    <div class="game-bottom-bar"><span>UGN JAVA // DIRECT BROWSER GAMEPLAY</span><span>JAVASCRIPT CLIENT · SELF-HOSTED OPEN-SOURCE BUILD</span></div>
   </section>
 
   <dialog id="information" class="info-dialog">
     <div class="dialog-heading"><span>UGN / ENGINE STATUS</span><button id="info-close" aria-label="Close information" type="button">×</button></div>
     <span class="dialog-orbit" aria-hidden="true">◇</span>
     <h2>A NEW DIMENSION<br>IS TAKING SHAPE.</h2>
-    <p>This is the real 3D UGN website experience. The in-page Minecraft Bedrock client is still being engineered; Microsoft sign-in, Bedrock protocol support, game assets and live multiplayer are not available yet. Nothing here pretends to be a playable Minecraft client.</p>
-    <p>The development direction is a browser-native Bedrock engine with reusable open-source renderer patterns, with mobile and desktop support. Microsoft tokens, when supported, will use session-only browser storage. Realms and friends' worlds remain deferred.</p>
-    <a href="https://github.com/Universal-Gaming/UGN-Bedrock" target="_blank" rel="noopener noreferrer" class="dialog-link">VIEW PROJECT SOURCE ↗</a>
+    <p>This 3D UGN website loads a separate, real browser-native Java Edition-compatible client compiled from the MIT-licensed Minecraft Web Client project. The client must first be built and deployed in /client/. Supported versions and features depend on that upstream implementation.</p>
+    <p>The self-hosted client supports singleplayer and compatible Java servers. Multiplayer needs a separately hosted secure WebSocket-to-TCP gateway; UGN's existing newer-version servers might exceed the client's current protocol support. Microsoft login belongs to the upstream client and must be audited for your preferred session-only token policy before production.</p>
+    <a href="https://github.com/Universal-Gaming/UGN-Java" target="_blank" rel="noopener noreferrer" class="dialog-link">VIEW PROJECT SOURCE ↗</a>
   </dialog>
 </body>
 </html>
