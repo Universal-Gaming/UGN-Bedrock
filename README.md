@@ -1,12 +1,12 @@
 # UGN Java — Play in Your Browser
 
-An independently designed, game-first website inspired by the **ease of use** of Eaglercraft, with original UGN space artwork and a real Java-compatible browser client embedded **inside the page**. No server-directory dashboard, IP checker or downloadable launcher.
+An independently designed, game-first website inspired by the **ease of use** of Eaglercraft, with original UGN space artwork and a real Java-compatible browser client that opens **in the same tab as a full-page UGN game**. No server-directory dashboard, IP checker or downloadable launcher.
 
 ## What is committed
 
-- An original WebGL2 raymarched portal with pointer orbit, responsive fallback and reduced-motion support.
+- An original WebGL2 animated cosmic background with pointer orbit, responsive fallback and reduced-motion support.
 - Simple Play Now homepage, deployment indicator, version support notice and game fullscreen view.
-- In-page embed of the **real, open-source** Minecraft Web Client from the PrismarineJS ecosystem and zardoy.
+- A direct same-tab game route for the **real, open-source** Minecraft Web Client from the PrismarineJS ecosystem and zardoy.
 - A pinned upstream source revision and automatic GitHub Actions build.
 - A required `client/ugn-build.json` manifest, so Play Now never presents decorative 3D animation as Minecraft.
 - Responsive controls for phone, tablet, Chromebook and desktop page layouts (in-game touch/controller support is owned by the upstream client).
@@ -25,7 +25,7 @@ The repository is still named `Universal-Gaming/UGN-Bedrock`. User-facing brandi
 1. Under repository **Settings → Pages**, choose **GitHub Actions** as the source; branch publishing won't copy the generated Java game client into `/client/`.
 2. The file `.github/workflows/deploy-java.yml` checks out pinned upstream revision `d7ab705efee3af674421c65e62b660ae470cad6b` and builds it using Node 22/pnpm 9.
 3. When the build succeeds, GitHub Actions deploys the entire UGN website with compiled client assets under `/client/`, along with `/client/ugn-build.json`.
-4. The page's Play Now button checks the build manifest and compiled `client/index.html`, then embeds the real game **in the same web page**.
+4. The page's Play Now button checks the build manifest and compiled `client/index.html`, then navigates to the game at **/client/index.html in the same browser tab**. This removes the iframe boundary that can interfere with browser pointer-lock mouse controls.
 5. A green JavaScript syntax validation run isn't evidence the game compiled or that gameplay is functioning. Verify the **Build and deploy UGN Java browser game** workflow and manually start a world after publish.
 
 Expected GitHub Pages address, once configured and deployment succeeds:
@@ -56,11 +56,11 @@ See `THIRD_PARTY_NOTICES.md` for upstream attribution.
 ## Project files
 
 ```
-index.html              UGN game-first homepage and in-page game workspace
-styles.css              Base 3D site styling, game view and dialogs
+index.html              UGN game-first homepage and temporary launch workspace
+styles.css              Legacy base styles, not loaded by the current homepage
 landing.css             Eaglercraft-inspired simple play page, original UGN design
 scene.js                Procedural, original WebGL2 portal
-app.js                  Game manifest verification, iframe and fullscreen lifecycle
+app.js                  Build verification and full-page same-tab game navigation
 client-config.js        Public client and manifest paths
 favicon.svg             Original UGN icon
 THIRD_PARTY_NOTICES.md  Source attribution and license
