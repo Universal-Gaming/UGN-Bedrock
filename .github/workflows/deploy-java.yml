@@ -67,6 +67,13 @@ jobs:
           node --check ugn/scripts/theme-client.mjs
           node ugn/scripts/theme-client.mjs upstream
 
+      - name: Fix embedded game mouse look and pointer capture
+        run: |
+          node --check ugn/scripts/fix-mouse-look.mjs
+          node ugn/scripts/fix-mouse-look.mjs upstream
+          grep -q 'const attempt = document.documentElement.requestPointerLock()' upstream/src/utils.ts
+          ! grep -q 'unadjustedMovement: options.mouseRawInput' upstream/src/utils.ts
+
       - name: Build genuine Java-compatible browser client
         working-directory: upstream
         env:
