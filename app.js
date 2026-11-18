@@ -1,8 +1,7 @@
 (() => {
   "use strict";
-
-  // This wrapper loads a REAL, independently developed Java browser game
-  // compiled into ./client/. It is not Minecraft's official Java client.
+  // UGN outer UI never asks for passwords, creates player profiles, or stores login tokens.
+  // The separately built upstream Java-compatible client controls its own world and account settings.
   const $ = (id) => document.getElementById(id);
   const scene = $("experience");
   const workspace = $("game-space");
@@ -16,10 +15,21 @@
   const fullscreen = $("game-fullscreen");
   const info = $("info-button");
   const infoClose = $("info-close");
+  const readiness = $("client-readiness");
+  const cardStatus = $("portal-client-status");
   const config = window.UGN_JAVA_CONFIG || {};
   let frame = null;
   let loading = false;
   let visible = false;
+  let buildPromise = null;
+  let requestNumber = 0;
+  const buildMetadata = String(config.buildMetadataPath || "./client/ugn-build.json");
+  const clientPath = String(config.clientPath || "./client/index.html");
+
+  function note(text, value) {
+    if (readiness) readiness.textContent = text;
+    if (cardStatus) cardStatus.textContent = value;
+  }
 
   function setVisibility(show) {
     visible = show;
@@ -34,102 +44,144 @@
     }
   }
 
-  async function checkSelfHostedClient(path) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8000);
-    try {
-      const url = new URL(path, document.baseURI);
-      if (url.origin !== location.origin) throw new Error("Client must be self-hosted on UGN origin.");
-      const response = await fetch(url.href, {
-        method: "GET", mode: "same-origin", redirect: "error",
-        credentials: "same-origin", cache: "no-store", signal: controller.signal
-      });
-      if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) {
-        throw new Error("The real game build was not found at " + url.pathname);
+  async function getBuild() {
+    if (buildPromise) return buildPromise;
+    buildPromise = (async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+      try {
+        const metaUrl = new URL(buildMetadata, document.baseURI);
+        const clientUrl = new URL(clientPath, document.baseURI);
+        if (metaUrl.origin !== location.origin || clientUrl.origin !== location.origin) {
+          throw new Error("The game client must be hosted on the same site.");
+        }
+        const response = await fetch(metaUrl.href, {
+          method: "GET",
+          cache: "no-store",
+          redirect: "error",
+          credentials: "same-origin",
+          signal: controller.signal
+        });
+        if (!response.ok || !response.headers.get("content-type")?.includes("application/json")) {
+          throw new Error("The compiled Java browser client has not been deployed.");
+        }
+        const manifest = await response.json();
+        if (!manifest || manifest.client !== "minecraft-web-client" || !/^[a-f0-9]{40}$/.test(manifest.upstreamCommit)) {
+          throw new Error("Unrecognized or incomplete UGN game build.");
+        }
+        const htmlResponse = await fetch(clientUrl.href, {
+          method: "GET",
+          cache: "no-store",
+          redirect: "error",
+          credentials: "same-origin",
+          signal: controller.signal
+        });
+        if (!htmlResponse.ok || !htmlResponse.headers.get("content-type")?.includes("text/html")) {
+          throw new Error("The game entrypoint is missing.");
+        }
+        return { url: clientUrl.href, manifest };
+      } finally {
+        clearTimeout(timer);
       }
-      return url.href;
-    } finally {
-      clearTimeout(timer);
+    })();
+    try {
+      return await buildPromise;
+    } catch (error) {
+      buildPromise = null;
+      throw error;
     }
   }
 
-  function showClientMissing(message) {
-    status.textContent = "CLIENT BUILD UNAVAILABLE";
+  function showMissing(error) {
+    status.textContent = "GAME BUILD UNAVAILABLE";
     placeholder.hidden = false;
+    note("BUILD NOT VERIFIED", "Game build unavailable");
     const description = placeholder.querySelector("p");
-    if (description) description.textContent = message;
+    if (description) description.textContent = (error instanceof Error ? error.message : "The client is unavailable.") +
+      " Check the repository's GitHub Actions deployment. No simulated game will be displayed.";
+  }
+
+  async function probeBuild() {
+    try {
+      const { manifest } = await getBuild();
+      note("CLIENT FILES FOUND", "Compiled files available");
+      // This is a file-deployment check, NOT proof of a loaded world or network connection.
+      const detail = `Pinned source: ${manifest.upstreamCommit.slice(0, 7)}`;
+      if (cardStatus) cardStatus.title = detail;
+    } catch {
+      note("BUILD PENDING", "Game files not deployed");
+    }
   }
 
   async function openGame() {
     setVisibility(true);
     if (frame) {
-      status.textContent = "JAVA CLIENT ACTIVE";
-      placeholder.hidden = true;
       frame.hidden = false;
+      status.textContent = "GAME VIEW OPEN";
+      placeholder.hidden = true;
       return;
     }
     if (loading) return;
     loading = true;
-    status.textContent = "CHECKING SELF-HOSTED GAME";
-    const path = String(config.clientPath || "./client/index.html");
+    const ownRequest = ++requestNumber;
+    status.textContent = "CHECKING GAME FILES";
     try {
-      const src = await checkSelfHostedClient(path);
-      if (!visible) return;
-      status.textContent = "LOADING JAVA CLIENT";
+      const { url } = await getBuild();
+      if (!visible || ownRequest !== requestNumber) return;
       const iframe = document.createElement("iframe");
       iframe.id = "ugn-java-client";
-      iframe.title = "UGN Java - in-browser Minecraft-compatible game client";
-      iframe.src = src;
-      iframe.allow = "fullscreen; clipboard-read; clipboard-write";
+      iframe.title = "UGN Java compatible browser game";
+      iframe.src = url;
+      iframe.allow = "fullscreen; gamepad; clipboard-read; clipboard-write";
       iframe.allowFullscreen = true;
       iframe.referrerPolicy = "same-origin";
       iframe.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;background:#050611;z-index:2";
       iframe.addEventListener("load", () => {
-        status.textContent = "JAVA CLIENT LOADED";
-      }, { once: true });
+        if (frame === iframe) status.textContent = "CLIENT PAGE LOADED";
+        // load does not attest that terrain rendering or multiplayer works.
+      });
       iframe.addEventListener("error", () => {
-        frame = null;
+        if (frame === iframe) frame = null;
         iframe.remove();
-        showClientMissing("The Java browser client failed to load. Inspect the GitHub Pages build and try again.");
-      }, { once: true });
+        showMissing(new Error("The browser could not load the game entrypoint."));
+      });
       frame = iframe;
       placeholder.hidden = true;
+      status.textContent = "OPENING JAVA GAME";
       mount.appendChild(iframe);
     } catch (error) {
-      showClientMissing(error instanceof Error
-        ? "The game is not deployed yet: " + error.message + ". Build the pinned open-source client in GitHub Actions and deploy its files under /client/."
-        : "The game could not be verified. Check the Java client Pages deployment.");
+      if (visible) showMissing(error);
     } finally {
       loading = false;
     }
   }
 
-  async function leaveGame() {
+  function leaveGame() {
+    requestNumber++;
     setVisibility(false);
-    // Keep iframe session alive within the tab; never copy game tokens into the outer page.
+    // Keep a loaded game in the tab, preserving in-game progress unless the upstream client exits.
     if (frame) frame.hidden = true;
   }
 
   enter.addEventListener("click", () => { void openGame(); });
-  exit.addEventListener("click", () => { void leaveGame(); });
-  placeholderExit.addEventListener("click", () => { void leaveGame(); });
+  exit.addEventListener("click", leaveGame);
+  placeholderExit.addEventListener("click", leaveGame);
   info.addEventListener("click", () => dialog.showModal());
   infoClose.addEventListener("click", () => dialog.close());
   fullscreen.addEventListener("click", async () => {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else if (workspace.requestFullscreen) await workspace.requestFullscreen();
+      else status.textContent = "FULLSCREEN IS NOT SUPPORTED";
     } catch {
-      status.textContent = "FULLSCREEN UNAVAILABLE";
+      status.textContent = "FULLSCREEN NOT AVAILABLE";
     }
   });
-
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && visible && !dialog.open && !document.fullscreenElement && document.activeElement !== frame) {
-      void leaveGame();
+      leaveGame();
     }
   });
-
-  // Browser multiplayer still requires an authorized WebSocket-to-TCP relay.
-  // The UGN wrapper never asks for passwords or Microsoft tokens.
+  // No fake auto-join, fake server status or fake 26.3 compatibility.
+  void probeBuild();
 })();
