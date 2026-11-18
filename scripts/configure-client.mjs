@@ -43,8 +43,7 @@ config.splashText="ONE NETWORK. YOUR NEXT ADVENTURE.";
 config.splashTextFallback="WELCOME TO UGN JAVA.";
 config.pauseLinks=[
   [
-    {type:"url",url:"https://universalgaming.us/",text:"UGN Website"},
-    {type:"url",url:"https://discord.universalgaming.us/",text:"UGN Discord"}
+    {type:"url",url:"https://universalgaming.us/",text:"UGN Website"}
   ]
 ];
 // Do not promote upstream map, P2P or other hosted services by default.
