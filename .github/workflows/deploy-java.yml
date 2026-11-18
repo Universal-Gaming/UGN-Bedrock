@@ -51,6 +51,11 @@ jobs:
         working-directory: upstream
         run: pnpm install --no-frozen-lockfile
 
+      - name: Apply UGN-only game menu configuration
+        run: |
+          node ugn/scripts/configure-client.mjs upstream ugn/server-config.json
+          node -e "const c=require('./upstream/config.json'); if(!Array.isArray(c.promoteServers)) process.exit(1); console.log('UGN promoted server count:',c.promoteServers.length)"
+
       - name: Build genuine Java-compatible browser client
         working-directory: upstream
         env:
@@ -66,7 +71,7 @@ jobs:
           test -s upstream/dist/index.html
           mkdir -p public/client
           cp -a upstream/dist/. public/client/
-          cp ugn/index.html ugn/styles.css ugn/landing.css ugn/app.js ugn/scene.js ugn/client-config.js ugn/favicon.svg public/
+          cp ugn/index.html ugn/landing.css ugn/app.js ugn/scene.js ugn/client-config.js ugn/favicon.svg ugn/server-config.json public/
           cp ugn/THIRD_PARTY_NOTICES.md public/THIRD_PARTY_NOTICES.md
           touch public/.nojekyll
           cat > public/client/ugn-build.json <<'EOF'
@@ -84,6 +89,7 @@ jobs:
           test -s public/index.html
           test -s public/landing.css
           test -s public/scene.js
+          test -s public/server-config.json
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
