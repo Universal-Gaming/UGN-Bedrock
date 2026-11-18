@@ -36,7 +36,12 @@ for(const item of extra.slice(0,16)){
 config.promoteServers=displayed;
 // Pre-fill the actual UGN Minecraft server as the first choice. This does
 // not open a TCP socket itself; browser connections still require a relay.
-config.defaultHost = displayed[0]?.ip || "";
+// Do NOT automatically connect when no browser relay is available. Otherwise
+// a raw TCP address can trigger startup errors / repeated reconnect attempts.
+// Keep UGN at the top of the game server list and enable defaultHost after relay setup.
+const relayIsReady = typeof custom.relay?.url === "string" && Boolean(custom.relay.url);
+config.defaultHost = relayIsReady ? (displayed[0]?.ip || "") : "";
+config.allowAutoConnect = false;
 config.defaultProxy="";
 config.defaultProxies=[];
 config.defaultUsername="UGNPlayer{0-9999}";
