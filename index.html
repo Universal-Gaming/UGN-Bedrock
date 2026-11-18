@@ -2,89 +2,94 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#080c1b">
-  <meta name="description" content="UGN Bedrock — a mobile-first, space-themed home for Bedrock multiplayer server discovery and future in-browser play.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070817">
+  <meta name="description" content="UGN Bedrock — an immersive Minecraft Bedrock browser client in development. No launcher. Just the world.">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
-  <title>UGN Bedrock — The Universe Is Yours</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>UGN BEDROCK — Enter the Universe</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./styles.css">
-  <script src="./config.js" defer></script>
+  <script src="./scene.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
 <body>
-  <div class="starfield" aria-hidden="true"><div class="stars stars-one"></div><div class="stars stars-two"></div><div class="nebula n1"></div><div class="nebula n2"></div></div>
-  <div class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="#home" aria-label="UGN Bedrock home"><span class="brand-glyph">U<span>G</span>N</span><span class="brand-name">UNIVERSAL <strong>BEDROCK</strong><small>GAMING NETWORK</small></span></a>
-      <nav aria-label="Main navigation" class="nav">
-        <a class="nav-link active" href="#discover" data-nav="discover">Discover</a>
-        <a class="nav-link" href="#connect" data-nav="connect">Direct Connect</a>
-        <a class="nav-link" href="#game" data-nav="game">Game View</a>
-      </nav>
-      <div class="top-actions"><span class="release-chip"><i></i> FOUNDATION BUILD</span><button class="btn btn-outline btn-small" id="settings-open" type="button" aria-label="Open settings">⚙ <span>Settings</span></button><button class="btn btn-primary btn-small" id="sign-in" type="button">Sign in with Microsoft</button></div>
+  <div class="experience" id="experience">
+    <canvas id="space-scene" aria-label="Interactive 3D cosmic portal environment" role="img"></canvas>
+    <div class="fallback-sky" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="masthead">
+      <a class="brand" href="#home" aria-label="UGN Bedrock home">
+        <span class="brand-mark" aria-hidden="true">U<span>G</span>N</span>
+        <span class="brand-divider"></span>
+        <span class="brand-copy"><strong>BEDROCK</strong><small>UNIVERSAL GAMING NETWORK</small></span>
+      </a>
+      <div class="masthead-right">
+        <span class="status-pill"><span class="status-light"></span> ENGINE IN DEVELOPMENT</span>
+        <button class="icon-button" id="sound-button" type="button" aria-label="Sound disabled" title="Audio is not yet connected" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m17 9 4 6m0-6-4 6"/></svg>
+        </button>
+        <button class="icon-button" id="info-button" type="button" aria-label="Project information" title="Project information">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        </button>
+      </div>
     </header>
 
-    <main id="home">
-      <section class="hero" aria-label="UGN Bedrock introduction">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="orbit-dot"></span> UNIVERSAL GAMING NETWORK <span class="eyebrow-line"></span> BEDROCK PROJECT</div>
-          <h1>THE UNIVERSE<br>IS <em>YOURS.</em></h1>
-          <p class="hero-lede">A new home for Bedrock multiplayer. Explore servers, connect by address, and follow the development of real gameplay <strong>inside your browser.</strong></p>
-          <div class="hero-buttons"><a class="btn btn-primary btn-large" href="#discover">Explore servers <span aria-hidden="true">↗</span></a><a class="btn btn-secondary btn-large" href="#game">View the game workspace <span aria-hidden="true">→</span></a></div>
-          <div class="hero-metrics"><div><strong>01</strong><small>PUBLIC DIRECTORY</small></div><div><strong>19132</strong><small>DEFAULT BEDROCK PORT</small></div><div><strong>∞</strong><small>WORLDS TO DISCOVER</small></div></div>
+    <main id="home" class="hero" aria-label="UGN Bedrock experience">
+      <div class="hero-content">
+        <div class="eyebrow"><span class="eyebrow-glyph">✦</span> BEYOND THE ORDINARY <span class="eyebrow-line"></span> UGN / 001</div>
+        <h1><span class="title-outline">UGN</span><br><span class="title-gradient">BEDROCK</span><span class="title-period">.</span></h1>
+        <p class="tagline">YOUR WORLD.<br><span>NO BOUNDARIES.</span></p>
+        <p class="hero-description">One extraordinary place for Minecraft Bedrock — directly in your browser. No launcher, no install, no imitation gameplay.</p>
+        <div class="hero-cta">
+          <button id="enter-button" class="enter-button" type="button"><span class="enter-icon">◇</span><span>ENTER GAME SPACE <small>OPEN THE IN-PAGE CLIENT</small></span><span class="enter-arrow">↗</span></button>
+          <span class="cta-note"><span class="tiny-pulse"></span> BROWSER ENGINE: NOT YET PLAYABLE</span>
         </div>
-        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="planet"><div class="planet-glow"></div><div class="planet-surface"></div></div><span class="orbit-label l1">UGN // BEDROCK</span><span class="orbit-label l2">INFINITE DISCOVERY</span><span class="orbit-satellite"></span></div>
-      </section>
-
-      <section class="strip" aria-label="Project state"><span class="strip-icon">◇</span><div><strong>Built for the browser, not a launcher.</strong><span>The server directory and site are the first functional components. A genuine Bedrock game engine and Xbox authorization are still in development.</span></div><span class="strip-tag">TRANSPARENT DEVELOPMENT</span></section>
-
-      <section id="discover" class="section discover">
-        <div class="section-head"><div><span class="section-kicker">01 / DISCOVER</span><h2>Find your next <em>world.</em></h2><p>Featured UGN worlds and community servers. Search the directory or connect to any supported public address.</p></div><div class="directory-indicator" id="directory-source">STARTER DIRECTORY</div></div>
-        <div class="browser-layout">
-          <aside class="browser-sidebar" aria-label="Server filters">
-            <div class="panel-heading">EXPLORE</div>
-            <button class="filter active" data-filter="all" type="button"><span>✦</span> All servers <span class="filter-count" id="all-count">1</span></button>
-            <button class="filter" data-filter="featured" type="button"><span>★</span> UGN featured</button>
-            <button class="filter" data-filter="favorites" type="button"><span>♡</span> Session favorites</button>
-            <button class="filter" data-filter="custom" type="button"><span>⌘</span> Your connections</button>
-            <div class="sidebar-note"><span class="sidebar-note-icon">ⓘ</span><p>Favorites and custom addresses last only for this browser tab session. Microsoft credentials are never stored in this directory.</p></div>
-          </aside>
-          <div class="browser-content">
-            <div class="browser-toolbar"><label class="search-field" for="search-servers"><span>⌕</span><input id="search-servers" type="search" placeholder="Search by name, mode or address…" autocomplete="off"></label><span class="listing-count" id="listing-count">LOADING DIRECTORY</span></div>
-            <div id="server-list" class="server-list" aria-live="polite"></div>
-            <div class="directory-footer"><span>Looking for somewhere else?</span><a href="#connect">Connect with a custom IP <span aria-hidden="true">→</span></a></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="connect" class="section connect">
-        <div class="section-head"><div><span class="section-kicker">02 / DIRECT CONNECT</span><h2>Have an <em>address?</em></h2><p>Enter a public Bedrock hostname or IP and port. Network checks use your own UGN gateway when configured.</p></div></div>
-        <div class="connect-grid">
-          <form class="glass-panel connect-form" id="connect-form" novalidate>
-            <div class="panel-title"><span class="panel-symbol">⌘</span><div><strong>MANUAL CONNECTION</strong><small>BEDROCK UDP · PORT 19132 DEFAULT</small></div></div>
-            <label for="server-host">SERVER HOSTNAME OR IP</label><input id="server-host" name="host" placeholder="play.example.net" autocomplete="off" maxlength="253" required>
-            <label for="server-port">SERVER PORT</label><input id="server-port" name="port" type="number" min="1" max="65535" inputmode="numeric" value="19132" required>
-            <div class="form-actions"><button class="btn btn-secondary" id="check-server" type="submit">Check server status <span aria-hidden="true">↗</span></button><button class="btn btn-primary" type="button" id="save-server">Add to this session</button></div>
-            <div role="status" aria-live="polite" id="connection-status" class="form-feedback">Server checks require the separately hosted UGN gateway.</div>
-          </form>
-          <div class="glass-panel connection-info"><div class="connection-orb" aria-hidden="true"></div><span class="section-kicker">YOUR CONNECTION, YOUR CHOICE</span><h3>No installation.<br><em>No fake servers.</em></h3><p>Address validation and real Bedrock ping are provided by an optional Node.js gateway. Joining an actual world requires the unfinished browser game engine and authenticated networking stack.</p><div class="mini-tags"><span>PUBLIC ADDRESSES</span><span>SAFE RESOLUTION</span><span>SESSION-ONLY UI</span></div></div>
-        </div>
-      </section>
-
-      <section id="game" class="section game-section">
-        <div class="section-head"><div><span class="section-kicker">03 / GAME WORKSPACE</span><h2>One page. <em>Every adventure.</em></h2><p>The live-game viewport will replace this engineering placeholder when the Bedrock renderer, player controls and multiplayer protocol are implemented.</p></div></div>
-        <div class="game-frame">
-          <div class="game-top"><div class="frame-dots"><i></i><i></i><i></i></div><span>UGN / BEDROCK / WEB CLIENT</span><span class="frame-state">● ENGINE NOT CONNECTED</span></div>
-          <div class="game-inner"><div class="grid-horizon" aria-hidden="true"></div><div class="game-core" aria-hidden="true"><span>◇</span></div><div class="game-message"><span class="section-kicker">BROWSER CLIENT MILESTONE</span><h3>THE WORLD IS<br><em>TAKING SHAPE.</em></h3><p>Real Minecraft worlds won't be simulated here. This area is reserved for the genuine Bedrock browser engine.</p><div class="game-progress"><span>FOUNDATION</span><div><i></i></div><span>IN PROGRESS</span></div><button id="game-info" class="btn btn-outline" type="button">View remaining work →</button></div></div>
-          <div class="game-bottom"><span>RENDERER / PENDING</span><span>AUTHORIZATION / PENDING</span><span>WORLD STREAMING / PENDING</span></div>
-        </div>
-      </section>
+      </div>
+      <div class="coordinates" aria-hidden="true"><span>UGN // PORTAL ARRAY</span><strong>01 / ∞</strong><span>AN IMMERSIVE EXPERIENCE</span></div>
     </main>
-    <footer class="footer"><div class="footer-brand">UGN <span>BEDROCK</span></div><p>Independent community project. Not affiliated with Mojang or Microsoft. Minecraft names and content belong to their respective owners.</p><div><a href="https://universalgaming.us/" rel="noopener noreferrer" target="_blank">UGN WEBSITE ↗</a><a href="https://discord.universalgaming.us/" rel="noopener noreferrer" target="_blank">DISCORD ↗</a><a href="https://github.com/Universal-Gaming/UGN-Bedrock" rel="noopener noreferrer" target="_blank">SOURCE ↗</a></div></footer>
+
+    <div class="edge-data edge-left" aria-hidden="true"><span>UNIVERSAL NETWORK</span><span>EST. UGN</span></div>
+    <div class="edge-data edge-right" aria-hidden="true"><span>DIMENSION 001</span><span>BEDROCK / WEB</span></div>
+
+    <footer class="scene-footer">
+      <div class="scene-controls"><span class="mouse-icon">⟡</span><span>DRAG TO ORBIT</span><span class="control-separator">/</span><span>SCROLL TO ZOOM</span></div>
+      <div class="footer-center"><span class="footer-dash"></span> BUILT FOR EVERY SCREEN <span class="footer-dash"></span></div>
+      <a class="ugn-link" href="https://universalgaming.us/" target="_blank" rel="noopener noreferrer">UNIVERSAL GAMING ↗</a>
+    </footer>
   </div>
-  <dialog id="modal" class="modal"><div class="modal-head"><strong id="modal-title">Information</strong><button id="modal-close" type="button" aria-label="Close dialog">×</button></div><div id="modal-body"></div><button class="btn btn-primary modal-ok" type="button" id="modal-ok">Got it</button></dialog>
-  <dialog id="settings-dialog" class="modal"><div class="modal-head"><strong>UGN BEDROCK SETTINGS</strong><button id="settings-close" type="button" aria-label="Close settings">×</button></div><div class="settings-body"><label class="setting-row"><span>Reduced animation<small>Disable decorative motion on this device</small></span><input type="checkbox" id="reduce-motion"></label><label class="setting-row"><span>Compact server cards<small>Fit more servers on smaller screens</small></span><input type="checkbox" id="compact-cards"></label><div class="settings-privacy"><strong>SESSION-ONLY PRIVACY</strong><p>This website uses sessionStorage for optional server favorites, temporary addresses and UI preferences. Microsoft authentication will use only session-based storage when configured. GitHub Pages does not collect passwords.</p><button id="clear-session" class="btn btn-secondary" type="button">Clear this tab's UGN data</button></div></div></dialog>
+
+  <section id="game-space" class="game-space" hidden aria-label="Browser game workspace">
+    <div class="game-topbar">
+      <div class="game-brand"><span>UGN</span><strong>BEDROCK</strong><small> / WEB ENGINE</small></div>
+      <div class="game-actions"><span class="game-status" id="game-status">RUNTIME NOT INSTALLED</span><button class="icon-button" id="game-fullscreen" type="button" title="Fullscreen game workspace" aria-label="Toggle fullscreen game workspace">⛶</button><button class="close-game" id="exit-button" type="button" aria-label="Return to 3D environment">×</button></div>
+    </div>
+    <div id="game-mount" class="game-mount" aria-label="Reserved canvas surface for real Bedrock gameplay">
+      <div id="engine-placeholder" class="engine-placeholder">
+        <div class="engine-emblem" aria-hidden="true">◇</div>
+        <span class="eyebrow engine-eyebrow">UGN / BEDROCK ENGINE</span>
+        <h2>THE NEXT WORLD<br><em>STARTS HERE.</em></h2>
+        <p>The game workspace is in place. Genuine Bedrock rendering, multiplayer networking, and Microsoft/Xbox authorization have not been integrated yet.</p>
+        <div class="milestones" role="list">
+          <span role="listitem"><i class="ready"></i> WEBSITE / READY</span>
+          <span role="listitem"><i></i> ENGINE / PENDING</span>
+          <span role="listitem"><i></i> AUTH / PENDING</span>
+        </div>
+        <button class="return-button" id="placeholder-exit" type="button">RETURN TO THE UNIVERSE <span>↗</span></button>
+      </div>
+    </div>
+    <div class="game-bottom-bar"><span>UGN BEDROCK // DIRECT BROWSER GAMEPLAY</span><span>FOUNDATION RELEASE · NO SIMULATED MINECRAFT</span></div>
+  </section>
+
+  <dialog id="information" class="info-dialog">
+    <div class="dialog-heading"><span>UGN / ENGINE STATUS</span><button id="info-close" aria-label="Close information" type="button">×</button></div>
+    <span class="dialog-orbit" aria-hidden="true">◇</span>
+    <h2>A NEW DIMENSION<br>IS TAKING SHAPE.</h2>
+    <p>This is the real 3D UGN website experience. The in-page Minecraft Bedrock client is still being engineered; Microsoft sign-in, Bedrock protocol support, game assets and live multiplayer are not available yet. Nothing here pretends to be a playable Minecraft client.</p>
+    <p>The development direction is a browser-native Bedrock engine with reusable open-source renderer patterns, with mobile and desktop support. Microsoft tokens, when supported, will use session-only browser storage. Realms and friends' worlds remain deferred.</p>
+    <a href="https://github.com/Universal-Gaming/UGN-Bedrock" target="_blank" rel="noopener noreferrer" class="dialog-link">VIEW PROJECT SOURCE ↗</a>
+  </dialog>
 </body>
 </html>
