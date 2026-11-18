@@ -1,0 +1,63 @@
+/* UGN Java 2.0 — a game-first, Eaglercraft-inspired layout.
+   Original UGN design; no copied Eaglercraft imagery, CSS or assets. */
+:root{--accent-mint:#8dffcf;--accent-sky:#71e7ff;--accent-purple:#a78bff}
+.experience{min-height:100svh;background:radial-gradient(ellipse at 72% 38%,#2a265b,#0b1025 54%,#060916 90%)}
+.experience .masthead{padding:24px clamp(24px,5vw,85px);border-bottom:1px solid #a5acd11b;background:linear-gradient(180deg,#090c1d90,transparent)}
+.topnav{display:flex;align-items:center;gap:26px;margin-left:auto;margin-right:24px}
+.topnav a{font-weight:750;font-size:12px;letter-spacing:.035em;color:#aab3d2;transition:color .2s;position:relative;padding:9px 0}
+.topnav a:hover,.topnav a.topnav-active{color:#f8f6ff}
+.topnav a.topnav-active:after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#a78bff,#6be6ff);border-radius:4px}
+.experience .hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.82fr);gap:clamp(20px,5vw,92px);align-items:center;min-height:min(670px,calc(100svh - 230px));padding:clamp(56px,8vh,108px) clamp(24px,8vw,130px) 75px}
+.hero-content{max-width:760px;min-width:0;position:relative;z-index:2}
+.hero-kicker{display:flex;align-items:center;gap:12px;font-size:10px;letter-spacing:.24em;font-weight:900;color:#b8a8fc}
+.kicker-star{font-size:20px;color:#94ebff;text-shadow:0 0 15px #86dbff}.kicker-rule{display:inline-block;width:33px;height:1px;background:#9185b2}
+.hero .home-title{font-size:clamp(58px,6.8vw,111px);letter-spacing:-.079em;line-height:.98;margin:22px 0 21px;white-space:normal;color:#f7f6ff;text-shadow:0 8px 45px #050612b0}
+.hero .home-title span{background:linear-gradient(97deg,#bcb1ff,#94aaff 50%,#73e7fd 100%);background-clip:text;-webkit-background-clip:text;color:transparent}
+.experience .tagline{font-size:clamp(12px,1.6vw,20px);letter-spacing:.14em;margin:0 0 14px;line-height:1.4}
+.experience .tagline span{color:#a8f0ec}
+.experience .hero-description{max-width:500px;font-size:clamp(12px,1.1vw,15px);line-height:1.8;color:#c2c9e6;margin-bottom:25px}
+.experience .hero-cta{align-items:flex-start;gap:12px}
+.experience .enter-button{border-radius:10px;min-width:340px;max-width:100%;padding:16px 21px;background:linear-gradient(107deg,#95f9d3,#67e5e6 56%,#a6a8fa);border:1px solid #d4fff9b8;box-shadow:0 16px 55px #65dfc122,0 0 40px #9dfae71c inset;color:#072334}
+.experience .enter-button:hover{box-shadow:0 15px 60px #72ffe266,0 0 50px #ffffff30 inset}
+.experience .enter-button>span:nth-child(2){font-size:15px}
+.experience .enter-button small{font-size:9px}
+.experience .enter-icon{font-size:20px;border:1px solid #1e657765;width:38px;height:38px;border-radius:9px;display:grid;place-items:center}
+.experience .cta-note{font-size:9px;color:#99e7ce}
+.game-support-line{margin-top:32px;display:flex;flex-wrap:wrap;gap:9px;align-items:center;font-size:10px;color:#aab4d2;font-weight:750;line-height:1.65}
+.game-support-line strong{color:#f0f2ff;font-size:11px}
+.game-support-line strong em{font-style:normal;font-size:9px;color:#ffc89b;font-weight:700;letter-spacing:.01em;margin-left:6px}
+.support-separator{width:1px;height:17px;background:#7d88b463;margin:0 8px}
+.portal-card{position:relative;z-index:3;min-height:420px;max-width:500px;width:100%;justify-self:end;border-radius:20px;background:linear-gradient(135deg,#1f2354ab 0%,#100f30d9 54%,#101c34d0 100%);border:1px solid #a6a1ec66;box-shadow:0 30px 100px #02050aaa,0 0 60px #9984ec18,inset 0 1px #b4a9ff49;overflow:hidden;display:flex;flex-direction:column;backdrop-filter:blur(13px)}
+.portal-card:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(145deg,#ffffff12,transparent 45%),radial-gradient(circle at 50% 48%,#8d69ff35,transparent 62%)}
+.portal-card:after{content:"";position:absolute;inset:15% 18% 23%;border:1px solid #9cb1fa22;transform:rotate(-24deg);border-radius:50%;pointer-events:none}
+.portal-card-top,.portal-card-bottom{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.portal-card-top{padding:23px 26px;font-size:10px;font-weight:850;letter-spacing:.1em;color:#d9ddff;border-bottom:1px solid #b0b5f321}
+.portal-number{color:#9cace0}.portal-tag{display:flex;align-items:center;gap:8px}.tag-dot{width:6px;height:6px;border-radius:50%;background:#a5ffd5;box-shadow:0 0 12px #7effc0}
+.portal-card-middle{flex:1;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;padding:15px 28px 28px}
+.portal-glyph{font-size:125px;line-height:1;font-weight:100;color:#c3b5ff;text-shadow:0 0 50px #b59aff,0 0 100px #7779ec;animation:portal-rotate 16s ease-in-out infinite alternate;display:block;margin-bottom:10px}
+.portal-card-middle strong{display:block;font-size:clamp(28px,2.7vw,41px);line-height:1.03;letter-spacing:-.045em;margin:8px 0;color:#f7f5ff}
+.portal-label{font-weight:800;font-size:9px;letter-spacing:.21em;color:#a8bff5}
+.portal-card-middle p{font-size:11px;color:#b3badd;line-height:1.65;max-width:240px;margin:10px auto 0}
+.portal-card-bottom{border-top:1px solid #b0b5f321;background:#080e2260;padding:18px 24px}
+.portal-card-bottom>div{display:flex;flex-direction:column;gap:6px}
+.portal-card-bottom span{font-size:9px;letter-spacing:.16em;color:#8799c4;font-weight:850}
+.portal-card-bottom strong{font-size:11px;letter-spacing:.02em;color:#d9f9f4;font-weight:750}
+.quick-features{position:relative;z-index:4;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 clamp(24px,5vw,85px);border:1px solid #737baa48;border-radius:11px;background:#111934ba;backdrop-filter:blur(12px);overflow:hidden}
+.quick-features>div{display:flex;align-items:center;gap:16px;padding:20px 20px;min-width:0;border-right:1px solid #6b719a48}
+.quick-features>div:last-child{border-right:0}
+.quick-symbol{font-size:24px;color:#b6a3ff;flex-shrink:0}
+.quick-features strong,.quick-features small{display:block;line-height:1.6}
+.quick-features strong{font-size:10px;letter-spacing:.11em}
+.quick-features small{font-size:10px;color:#a8b1ce}
+.experience .scene-footer{padding:25px clamp(24px,5vw,85px) 25px;color:#8996b8;gap:22px;justify-content:space-between;font-size:9px;line-height:1.65}
+.experience .scene-footer .scene-controls{font-size:9px}
+.experience .scene-footer>a{font-size:9px}
+.game-space{background:#030612}
+.game-space .game-topbar{background:linear-gradient(105deg,#101a2d,#0d1229)}
+.game-space .game-brand strong{color:#adf8e2}
+@keyframes portal-rotate{from{transform:rotate(-17deg) scale(.96)}to{transform:rotate(23deg) scale(1.07)}}
+@media(max-width:1150px){.experience .hero{grid-template-columns:minmax(0,1fr) minmax(300px,.8fr);gap:30px;padding-left:6%;padding-right:6%}.hero .home-title{font-size:clamp(55px,7.1vw,85px)}.portal-card{min-height:370px}.quick-features>div{padding:15px 12px;gap:10px}}
+@media(max-width:900px){.experience .hero{grid-template-columns:1fr;min-height:auto;gap:35px;padding-top:55px}.hero .home-title{font-size:clamp(64px,11vw,102px)}.portal-card{width:100%;max-width:none;min-height:260px;display:grid;grid-template-columns:1fr 1fr;justify-self:stretch}.portal-card-top{grid-column:1/-1}.portal-card-middle{padding:0 16px;flex-direction:row;align-items:center;gap:20px;justify-content:start;text-align:left}.portal-glyph{font-size:86px;margin:0}.portal-card-middle strong{font-size:26px}.portal-card-middle p{margin:7px 0 0}.portal-card-bottom{border-top:0;flex-direction:column;align-items:flex-start;justify-content:center;padding:18px}.quick-features{grid-template-columns:1fr 1fr}.quick-features>div:nth-child(2){border-right:0}.quick-features>div:nth-child(-n+2){border-bottom:1px solid #6b719a48}.topnav{gap:15px;margin-right:8px}}
+@media(max-width:650px){.experience .masthead{flex-wrap:wrap;gap:10px;padding:18px 20px}.topnav{order:3;width:100%;margin:0;justify-content:space-between;gap:8px;padding-top:9px;border-top:1px solid #656f9630}.topnav a{font-size:11px}.brand-mark{font-size:28px}.status-pill{font-size:8px;max-width:150px;white-space:normal}.experience .hero{padding:44px 20px 30px;gap:25px}.hero .home-title{font-size:clamp(46px,12.1vw,75px)}.experience .hero-description{max-width:360px}.hero-kicker{font-size:8px;letter-spacing:.1em}.kicker-rule{width:20px}.experience .enter-button{width:100%;min-width:0;max-width:380px}.game-support-line{gap:5px;font-size:9px}.game-support-line strong{font-size:10px}.support-separator{margin:0 3px}.portal-card{grid-template-columns:1fr;min-height:280px}.portal-card-top{padding:12px 18px}.portal-card-middle{padding:16px 18px;justify-content:center}.portal-glyph{font-size:75px}.portal-card-middle strong{font-size:23px}.portal-card-middle p{font-size:10px}.portal-card-bottom{border-top:1px solid #b0b5f321;display:flex;flex-direction:row;justify-content:space-between;padding:14px 18px}.portal-card-bottom span{font-size:7px}.portal-card-bottom strong{font-size:9px}.quick-features{margin:0 20px;grid-template-columns:1fr 1fr}.quick-features>div{padding:13px 10px;gap:9px}.quick-symbol{font-size:19px}.quick-features strong{font-size:8px}.quick-features small{font-size:9px}.experience .scene-footer{padding:17px 20px 25px}.scene-footer span:first-child{max-width:190px}.experience .scene-footer .scene-controls{display:none}.scene-footer .ugn-link{font-size:8px}}
+@media(max-width:390px){.experience .hero{padding-top:35px}.hero .home-title{font-size:44px}.status-pill{max-width:128px}.portal-card-middle{gap:10px}.portal-glyph{font-size:60px}.quick-features small{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.portal-glyph{animation:none}}
