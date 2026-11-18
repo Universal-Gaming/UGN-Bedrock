@@ -206,8 +206,11 @@
       address.textContent = String(entry.host).slice(0, 253) + ":" + port;
       state.replaceChildren();
       const dot = document.createElement("i");
-      state.append(dot, document.createTextNode("ADDRESS CONFIGURED · NOT PINGED"));
-      state.classList.add("configured");
+      const hasRelay = typeof cfg.relay?.url === "string" && /^wss:\/\/|^https:\/\//i.test(cfg.relay.url);
+      state.append(dot, document.createTextNode(
+        hasRelay ? "SERVER SET · CONNECTIVITY UNVERIFIED" : "SERVER SET · BROWSER RELAY REQUIRED"
+      ));
+      state.classList.toggle("configured", hasRelay);
     } catch {
       state.textContent = "FEATURED SERVER CONFIG PENDING";
       address.textContent = "SET UP SERVER-CONFIG.JSON";
