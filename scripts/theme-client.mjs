@@ -231,7 +231,7 @@ const theme = String.raw`
     .menu button { transition: none !important; }
 }
 `;
-fs.writeFileSync(stylesheetFile, css + theme);
+fs.writeFileSync(stylesheetFile, css + theme + "\n.root::before,.root::after { display: none !important; }\n");
 const globalFile = path.join(root, "src/styles.css");
 const backgroundCss = fs.readFileSync(new URL("./ugn-menu-background.css", import.meta.url), "utf8");
 fs.appendFileSync(globalFile, "\n" + backgroundCss + "\n");
