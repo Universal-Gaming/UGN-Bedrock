@@ -76,6 +76,11 @@ jobs:
           node ugn/scripts/test-mouse-look.mjs upstream
           node --check ugn/scripts/install-mouse-controls.mjs
           node ugn/scripts/install-mouse-controls.mjs upstream
+          node --check ugn/scripts/polish-mouse-capture.mjs
+          node ugn/scripts/polish-mouse-capture.mjs upstream
+          grep -q "onGamePointerDown" upstream/src/react/GlobalOverlayHints.tsx
+          grep -q "const [hasClickedGame, setHasClickedGame]" upstream/src/react/GlobalOverlayHints.tsx
+          grep -q "ugnTryCapture()" upstream/src/controls.ts
           grep -q 'UGNMouseDiagnostics' upstream/src/controls.ts
           grep -q 'ugn-drag' upstream/src/controls.ts
           grep -q 'ugnMouseStats.cameraUpdates' upstream/src/cameraRotationControls.ts
