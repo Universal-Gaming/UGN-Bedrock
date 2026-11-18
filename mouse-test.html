@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#09152a">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>UGN Java · Mouse Control Diagnostic</title>
+  <link rel="stylesheet" href="./mouse-test.css">
+  <script src="./mouse-test.js" defer></script>
+</head>
+<body>
+  <header><a href="./">UGN JAVA</a><span>MC BROWSER EDITION / INPUT TEST</span></header>
+  <main>
+    <span class="eyebrow">INPUT DIAGNOSTIC</span>
+    <h1>CAN YOUR BROWSER<br><em>CAPTURE THE MOUSE?</em></h1>
+    <p>This tests your browser's cursor lock, separately from Minecraft. It doesn't touch world saves, account settings or your server.</p>
+    <div class="actions">
+      <button id="capture" type="button">⌖ TEST MOUSE CAPTURE</button>
+      <button id="copy" type="button">COPY RESULTS</button>
+      <a href="./client/index.html">RETURN TO GAME ↗</a>
+    </div>
+    <div class="viewport" id="arena" tabindex="0" role="application" aria-label="Test camera rotation. Click to lock cursor.">
+      <div class="sky"><div class="world" id="world"><div class="cube"><i>UGN</i></div></div></div>
+      <div class="reticle" aria-hidden="true">+</div>
+      <span class="hud">MOVE YOUR MOUSE TO ROTATE · ESC TO RELEASE</span>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite">Click Test Mouse Capture above.</p>
+    <pre id="results" aria-label="Mouse diagnostic results"></pre>
+    <p class="privacy">The test does not send diagnostic data anywhere. Copy the results if you want to share them for troubleshooting. You don't need to clear your Minecraft browser data.</p>
+  </main>
+</body>
+</html>
