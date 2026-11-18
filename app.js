@@ -182,6 +182,42 @@
       leaveGame();
     }
   });
-  // No fake auto-join, fake server status or fake 26.3 compatibility.
+  async function loadFeaturedServer() {
+    const name = $("featured-name");
+    const description = $("featured-description");
+    const address = $("featured-host");
+    const state = $("featured-state");
+    if (!name || !description || !address || !state) return;
+    try {
+      const response = await fetch(new URL("./server-config.json", document.baseURI), {
+        cache: "no-store", credentials: "omit"
+      });
+      if (!response.ok) throw new Error("Configuration is unavailable.");
+      const cfg = await response.json();
+      const entry = cfg && cfg.featuredServer;
+      if (!entry || !entry.enabled || typeof entry.host !== "string" || !entry.host.trim()) {
+        state.replaceChildren();
+        const dot = document.createElement("i");
+        state.append(dot, document.createTextNode("COMING SOON"));
+        state.classList.remove("configured");
+        address.textContent = "YOUR SERVER WILL APPEAR HERE";
+        return;
+      }
+      const port = Number(entry.port);
+      if (!Number.isInteger(port) || port < 1 || port > 65535) return;
+      name.textContent = String(entry.name || "UGN Java").slice(0, 70);
+      description.textContent = String(entry.description || "Official UGN Java community world").slice(0, 190);
+      address.textContent = String(entry.host).slice(0, 253) + ":" + port;
+      state.replaceChildren();
+      const dot = document.createElement("i");
+      state.append(dot, document.createTextNode("ADDRESS CONFIGURED · NOT PINGED"));
+      state.classList.add("configured");
+    } catch {
+      state.textContent = "FEATURED SERVER CONFIG PENDING";
+      address.textContent = "SET UP SERVER-CONFIG.JSON";
+    }
+  }
+  // No fake online statuses, fabricated servers, or fake 26.3 compatibility.
   void probeBuild();
+  void loadFeaturedServer();
 })();
