@@ -74,6 +74,11 @@ jobs:
           grep -q 'const attempt = document.documentElement.requestPointerLock()' upstream/src/utils.ts
           ! grep -q 'unadjustedMovement: options.mouseRawInput' upstream/src/utils.ts
           node ugn/scripts/test-mouse-look.mjs upstream
+          node --check ugn/scripts/install-mouse-controls.mjs
+          node ugn/scripts/install-mouse-controls.mjs upstream
+          grep -q 'UGNMouseDiagnostics' upstream/src/controls.ts
+          grep -q 'ugn-drag' upstream/src/controls.ts
+          grep -q 'ugnMouseStats.cameraUpdates' upstream/src/cameraRotationControls.ts
 
       - name: Build genuine Java-compatible browser client
         working-directory: upstream
