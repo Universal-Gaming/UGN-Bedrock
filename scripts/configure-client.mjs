@@ -34,7 +34,9 @@ for(const item of extra.slice(0,16)){
 }
 // Make it UGN-only by default: no third-party promoted servers or public proxy list.
 config.promoteServers=displayed;
-config.defaultHost="";
+// Pre-fill the actual UGN Minecraft server as the first choice. This does
+// not open a TCP socket itself; browser connections still require a relay.
+config.defaultHost = displayed[0]?.ip || "";
 config.defaultProxy="";
 config.defaultProxies=[];
 config.defaultUsername="UGNPlayer{0-9999}";
