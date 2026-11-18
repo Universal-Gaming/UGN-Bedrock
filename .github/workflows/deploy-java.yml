@@ -1,0 +1,86 @@
+name: Build and deploy UGN Java browser game
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ugn-java-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Check out UGN website
+        uses: actions/checkout@v4
+        with:
+          path: ugn
+
+      - name: Check out pinned MIT-licensed Java browser client
+        uses: actions/checkout@v4
+        with:
+          repository: zardoy/minecraft-web-client
+          ref: d7ab705efee3af674421c65e62b660ae470cad6b
+          path: upstream
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: upstream/pnpm-lock.yaml
+
+      - name: Install pinned game dependencies
+        working-directory: upstream
+        run: pnpm install --frozen-lockfile
+
+      - name: Build genuine browser client
+        working-directory: upstream
+        env:
+          CI: 'true'
+          GENDATA_EXT_URL: 'off'
+          DISABLE_SERVICE_WORKER: 'true'
+        run: pnpm build
+
+      - name: Verify compiled client and assemble GitHub Pages
+        run: |
+          set -euo pipefail
+          test -s upstream/dist/index.html
+          mkdir -p public/client
+          cp -a upstream/dist/. public/client/
+          cp ugn/index.html ugn/styles.css ugn/app.js ugn/scene.js ugn/client-config.js ugn/favicon.svg public/
+          cp ugn/THIRD_PARTY_NOTICES.md public/THIRD_PARTY_NOTICES.md
+          touch public/.nojekyll
+          test -s public/client/index.html
+          test -s public/index.html
+          test -s public/scene.js
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy site with in-page Java client
+        id: deployment
+        uses: actions/deploy-pages@v4
