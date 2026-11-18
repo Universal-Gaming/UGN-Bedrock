@@ -41,9 +41,18 @@ config.defaultUsername="UGNPlayer{0-9999}";
 config.rightSideText="UGN JAVA | MC BROWSER EDITION";
 config.splashText="ONE NETWORK. YOUR NEXT ADVENTURE.";
 config.splashTextFallback="WELCOME TO UGN JAVA.";
+const existingSettings = config.defaultSettings || {};
+const existingForced = config.forceSettings || {};
+// GitHub Pages can lack headers needed by the WASM worker path on some browsers.
+// Start with the renderer's supported JavaScript mesher; override previously saved
+// WASM preferences via the native appConfig forceSettings mechanism.
+config.defaultSettings = { ...existingSettings, rendererMesher: "legacy-js" };
+config.forceSettings = { ...existingForced, rendererMesher: true };
+
 config.pauseLinks=[
   [
-    {type:"url",url:"https://universalgaming.us/",text:"UGN Website"}
+    {type:"url",url:"https://universalgaming.us/",text:"UGN Website"},
+    {type:"url",url:"https://github.com/Universal-Gaming/UGN-Bedrock",text:"UGN GitHub"}
   ]
 ];
 // Do not promote upstream map, P2P or other hosted services by default.
