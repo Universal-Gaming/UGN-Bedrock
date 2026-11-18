@@ -1,11 +1,11 @@
 (() => {
   "use strict";
 
-  // UI only. Bedrock game logic and Microsoft/Xbox auth are NOT implemented.
-  // The actual game client must mount into #game-mount via a separately developed engine.
+  // This wrapper loads a REAL, independently developed Java browser game
+  // compiled into ./client/. It is not Minecraft's official Java client.
   const $ = (id) => document.getElementById(id);
-  const stage = $("experience");
-  const game = $("game-space");
+  const scene = $("experience");
+  const workspace = $("game-space");
   const mount = $("game-mount");
   const placeholder = $("engine-placeholder");
   const status = $("game-status");
@@ -13,75 +13,101 @@
   const enter = $("enter-button");
   const exit = $("exit-button");
   const placeholderExit = $("placeholder-exit");
-  const fullscreenButton = $("game-fullscreen");
+  const fullscreen = $("game-fullscreen");
   const info = $("info-button");
   const infoClose = $("info-close");
-  let inGameSpace = false;
-  let engineRunning = false;
+  const config = window.UGN_JAVA_CONFIG || {};
+  let frame = null;
+  let loading = false;
+  let visible = false;
 
-  function setSpaceVisible(show) {
-    inGameSpace = show;
-    game.hidden = !show;
-    stage.setAttribute("aria-hidden", String(show));
+  function setVisibility(show) {
+    visible = show;
+    workspace.hidden = !show;
+    scene.setAttribute("aria-hidden", String(show));
     document.body.style.overflow = show ? "hidden" : "";
-    if (window.UGNScene) window.UGNScene.setActive(!show);
-    if (show) {
-      if (engineRunning) {
-        status.textContent = "BROWSER ENGINE MOUNTED";
-      } else {
-        status.textContent = "RUNTIME NOT INSTALLED";
-      }
-      exit.focus({ preventScroll: true });
-    } else {
-      if (document.fullscreenElement && game.contains(document.fullscreenElement)) {
-        document.exitFullscreen().catch(() => {});
-      }
-      enter.focus({ preventScroll: true });
+    window.UGNScene?.setActive(!show);
+    if (show) exit.focus({ preventScroll: true });
+    else enter.focus({ preventScroll: true });
+    if (!show && document.fullscreenElement && workspace.contains(document.fullscreenElement)) {
+      document.exitFullscreen().catch(() => {});
     }
   }
 
-  // Engine API contract for a future real Bedrock browser runtime:
-  // window.UGNBedrockEngine = {
-  //   async mount({ container, onStatus }) { ... real client ...; return true; },
-  //   async suspend() { ... },
-  //   async resume() { ... },
-  //   async unmount() { ... }
-  // }
-  // Do NOT mark connected until the actual engine confirms initialization.
+  async function checkSelfHostedClient(path) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    try {
+      const url = new URL(path, document.baseURI);
+      if (url.origin !== location.origin) throw new Error("Client must be self-hosted on UGN origin.");
+      const response = await fetch(url.href, {
+        method: "GET", mode: "same-origin", redirect: "error",
+        credentials: "same-origin", cache: "no-store", signal: controller.signal
+      });
+      if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) {
+        throw new Error("The real game build was not found at " + url.pathname);
+      }
+      return url.href;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function showClientMissing(message) {
+    status.textContent = "CLIENT BUILD UNAVAILABLE";
+    placeholder.hidden = false;
+    const description = placeholder.querySelector("p");
+    if (description) description.textContent = message;
+  }
+
   async function openGame() {
-    setSpaceVisible(true);
-    const engine = window.UGNBedrockEngine;
-    if (!engine || typeof engine.mount !== "function" || engineRunning) {
-      placeholder.hidden = engineRunning;
+    setVisibility(true);
+    if (frame) {
+      status.textContent = "JAVA CLIENT ACTIVE";
+      placeholder.hidden = true;
+      frame.hidden = false;
       return;
     }
-    status.textContent = "STARTING CLIENT";
+    if (loading) return;
+    loading = true;
+    status.textContent = "CHECKING SELF-HOSTED GAME";
+    const path = String(config.clientPath || "./client/index.html");
     try {
-      const initialized = await engine.mount({
-        container: mount,
-        onStatus(message) {
-          if (typeof message === "string") status.textContent = message.slice(0, 60);
-        }
-      });
-      engineRunning = initialized === true;
-      placeholder.hidden = engineRunning;
-      if (!engineRunning) status.textContent = "RUNTIME NOT READY";
-      if (!inGameSpace && engineRunning && typeof engine.suspend === "function") {
-        await engine.suspend();
-      }
+      const src = await checkSelfHostedClient(path);
+      if (!visible) return;
+      status.textContent = "LOADING JAVA CLIENT";
+      const iframe = document.createElement("iframe");
+      iframe.id = "ugn-java-client";
+      iframe.title = "UGN Java - in-browser Minecraft-compatible game client";
+      iframe.src = src;
+      iframe.allow = "fullscreen; clipboard-read; clipboard-write";
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = "same-origin";
+      iframe.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;background:#050611;z-index:2";
+      iframe.addEventListener("load", () => {
+        status.textContent = "JAVA CLIENT LOADED";
+      }, { once: true });
+      iframe.addEventListener("error", () => {
+        frame = null;
+        iframe.remove();
+        showClientMissing("The Java browser client failed to load. Inspect the GitHub Pages build and try again.");
+      }, { once: true });
+      frame = iframe;
+      placeholder.hidden = true;
+      mount.appendChild(iframe);
     } catch (error) {
-      console.error("UGN Bedrock engine startup failed:", error);
-      engineRunning = false;
-      placeholder.hidden = false;
-      status.textContent = "RUNTIME ERROR";
+      showClientMissing(error instanceof Error
+        ? "The game is not deployed yet: " + error.message + ". Build the pinned open-source client in GitHub Actions and deploy its files under /client/."
+        : "The game could not be verified. Check the Java client Pages deployment.");
+    } finally {
+      loading = false;
     }
   }
 
   async function leaveGame() {
-    if (engineRunning && window.UGNBedrockEngine?.suspend) {
-      try { await window.UGNBedrockEngine.suspend(); } catch (error) { console.warn("Unable to suspend engine", error); }
-    }
-    setSpaceVisible(false);
+    setVisibility(false);
+    // Keep iframe session alive within the tab; never copy game tokens into the outer page.
+    if (frame) frame.hidden = true;
   }
 
   enter.addEventListener("click", () => { void openGame(); });
@@ -89,30 +115,21 @@
   placeholderExit.addEventListener("click", () => { void leaveGame(); });
   info.addEventListener("click", () => dialog.showModal());
   infoClose.addEventListener("click", () => dialog.close());
-
-  fullscreenButton.addEventListener("click", async () => {
+  fullscreen.addEventListener("click", async () => {
     try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      } else if (game.requestFullscreen) {
-        await game.requestFullscreen();
-      }
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else if (workspace.requestFullscreen) await workspace.requestFullscreen();
     } catch {
       status.textContent = "FULLSCREEN UNAVAILABLE";
     }
   });
 
   window.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-    if (dialog.open) return; // Native dialog handles Escape itself.
-    if (inGameSpace && !document.fullscreenElement) void leaveGame();
-  });
-
-  document.addEventListener("visibilitychange", () => {
-    if (!engineRunning || !window.UGNBedrockEngine) return;
-    const fn = document.hidden ? window.UGNBedrockEngine.suspend : window.UGNBedrockEngine.resume;
-    if (typeof fn === "function" && inGameSpace) {
-      Promise.resolve(fn.call(window.UGNBedrockEngine)).catch((error) => console.warn("Engine visibility transition failed", error));
+    if (event.key === "Escape" && visible && !dialog.open && !document.fullscreenElement && document.activeElement !== frame) {
+      void leaveGame();
     }
   });
+
+  // Browser multiplayer still requires an authorized WebSocket-to-TCP relay.
+  // The UGN wrapper never asks for passwords or Microsoft tokens.
 })();
