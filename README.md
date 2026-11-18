@@ -1,67 +1,69 @@
-# UGN Java — Browser Edition
+# UGN Java — Play in Your Browser
 
-A cinematic, mobile-responsive UGN 3D website with **real Minecraft Java-compatible browser gameplay loaded in the page**. This replaces the abandoned Bedrock browser-engine plan.
+An independently designed, game-first website inspired by the **ease of use** of Eaglercraft, with original UGN space artwork and a real Java-compatible browser client embedded **inside the page**. No server-directory dashboard, IP checker or downloadable launcher.
 
-**This repository remains named `UGN-Bedrock` for now** because no repository rename was requested. The site branding is **UGN Java**. The repository can be renamed from GitHub Settings if desired (renaming updates the Pages URL).
+## What is committed
 
-## What UGN built
+- An original WebGL2 raymarched portal with pointer orbit, responsive fallback and reduced-motion support.
+- Simple Play Now homepage, deployment indicator, version support notice and game fullscreen view.
+- In-page embed of the **real, open-source** Minecraft Web Client from the PrismarineJS ecosystem and zardoy.
+- A pinned upstream source revision and automatic GitHub Actions build.
+- A required `client/ugn-build.json` manifest, so Play Now never presents decorative 3D animation as Minecraft.
+- Responsive controls for phone, tablet, Chromebook and desktop page layouts (in-game touch/controller support is owned by the upstream client).
+- No UGN website account database or Microsoft sign-in requirement. The upstream client has its own settings; see privacy caveats.
 
-- One full-screen UGN universe experience: original real-time raymarched WebGL2 portal.
-- Drag to rotate the 3D viewing angle; scroll to zoom; CSS fallback for unsupported devices.
-- A single **ENTER GAME SPACE** button and full-screen in-page gameplay surface.
-- No UGN server lists, IP checker, login imitation or website launcher.
-- On enter, the page checks for a real compiled client at `./client/index.html` and loads it within the same page.
-- The wrapper itself does not collect passwords or tokens or use persistent browser storage.
+## Version compatibility
 
-## The actual playable Java client
+On **November 18, 2026**, the newest stable official Minecraft Java release is **26.3**. The currently chosen browser client advertises support for Java **1.8 through 1.21.5**, with 1.19.4 and 1.21.4 among its better-tested versions.
 
-We use the real, open-source **Minecraft Web Client** project by the PrismarineJS ecosystem and zardoy (MIT-licensed code), **not** a copy of the Eaglercraft Java source or official Minecraft distribution.
+The website **does not** pretend to support 26.3. Making this independent browser engine natively compatible with Minecraft 26.3 would require upstream protocol, assets, world data, entity and gameplay work. Running an older client through ViaVersion may allow connections to some newer servers but **does not deliver the missing newer-version features**. There is no safe shortcut that changes a version label into a functioning 26.3 client.
 
-Upstream: https://github.com/zardoy/minecraft-web-client
+## Build and deploy
 
-Pinned revision: `d7ab705efee3af674421c65e62b660ae470cad6b`.
+The repository is still named `Universal-Gaming/UGN-Bedrock`. User-facing branding is **UGN Java**.
 
-The GitHub Actions build compiles the upstream application and copies its actual assets into `/client/` in the Pages deployment. The client itself provides singleplayer, inventories, textures and rendering on compatible browsers. Java multiplayer requires a **separately hosted** secure WebSocket-to-TCP relay and a compatible Java server. See upstream documentation for supported versions (documented through 1.21.5), limitations and licensing.
+1. Under repository **Settings → Pages**, choose **GitHub Actions** as the source; branch publishing won't copy the generated Java game client into `/client/`.
+2. The file `.github/workflows/deploy-java.yml` checks out pinned upstream revision `d7ab705efee3af674421c65e62b660ae470cad6b` and builds it using Node 22/pnpm 9.
+3. When the build succeeds, GitHub Actions deploys the entire UGN website with compiled client assets under `/client/`, along with `/client/ugn-build.json`.
+4. The page's Play Now button checks the build manifest and compiled `client/index.html`, then embeds the real game **in the same web page**.
+5. A green JavaScript syntax validation run isn't evidence the game compiled or that gameplay is functioning. Verify the **Build and deploy UGN Java browser game** workflow and manually start a world after publish.
 
-This means:
-- **This isn't the official Minecraft Java binary, nor Eaglercraft.**
-- The upstream client may have its own local save and login preferences. Its privacy/storage behavior needs a separate audit; the outer UGN page does not manage that.
-- A Microsoft account is not required for offline singleplayer. Authenticated online servers have additional requirements and may not be usable until a permitted login flow and relay are configured.
-- UGN's Minecraft 26.x servers are **not** assumed compatible with an upstream client that advertises support only through 1.21.5.
-- The 3D portal is **decorative website UI**, not a fake Minecraft world.
-
-## Deploy to GitHub Pages
-
-1. Open repository **Settings → Pages**.
-2. Change **Build and deployment** → Source to **GitHub Actions**.
-3. Workflow `.github/workflows/deploy-java.yml` runs on pushes to `main` (or manually from Actions). It checks out the pinned open-source client, compiles it with Node/pnpm and publishes the main website plus the real game in `/client/`.
-4. Check the Actions tab for a green **Build and deploy UGN Java browser game** run.
-5. After successful GitHub Pages deployment, the expected site URL at the existing repo name is `https://universal-gaming.github.io/UGN-Bedrock/`.
-
-**Important:** If the game compilation or Pages deployment fails, the website will explicitly say the game is unavailable. It will never silently pretend to be playable. A successful GitHub commit does not prove a successful CI build or deployed game.
-
-**Production checks:** Review the upstream/client dependencies, the source license versus Minecraft assets and trademark rules, auth/token storage, network relay abuse protection and browser compatibility before public release. See `THIRD_PARTY_NOTICES.md`.
-
-## Next integration: multiplayer
-
-For Java multiplayer, run a hardened and access-controlled WebSocket-to-TCP relay on a Rocky Linux/Pterodactyl node with TLS and public port restrictions. `mwc-proxy` is described upstream as one option: https://github.com/zardoy/mwc-proxy .
-
-Do not use an open proxy capable of accessing localhost, metadata IPs or internal networks. Configure server allowlists, limits and monitoring. We have **not** deployed or connected any multiplayer proxy in this build.
-
-Eaglercraft-specific Velocity support is a different protocol; do not assume it will work with this client. UGN's current Java 26.x network requires separate version testing or an appropriate version-compatible backend.
-
-## Repository structure
+Expected GitHub Pages address, once configured and deployment succeeds:
 
 ```
-index.html          UGN outer website
-styles.css          UGN styles
-scene.js            procedural 3D portal WebGL2
-app.js              in-page game iframe lifecycle
-client-config.js    public path to the self-hosted client
-favicon.svg         UGN favicon
-THIRD_PARTY_NOTICES.md
+https://universal-gaming.github.io/UGN-Bedrock/
+```
+
+The upstream pinned source's `patchedDependencies` did not match its lockfile on its original revision. Our workflow uses `pnpm install --no-frozen-lockfile` to address that specific build blocker, while retaining a pinned upstream checkout. Dependency integrity and maintenance need continued auditing.
+
+## Singleplayer and multiplayer
+
+Supported offline singleplayer does not require Microsoft sign-in on the UGN website. This does **not** make the browser client the official Minecraft Java game.
+
+For multiplayer, Java uses raw TCP but browsers only expose WebSockets. Use a separate **restricted WebSocket-to-TCP proxy** such as the upstream-documented [mwc-proxy](https://github.com/zardoy/mwc-proxy) on the UGN Rocky Linux/Pterodactyl infrastructure. Set TLS (`wss://`), restrict allowed destination servers, block all internal network and metadata address ranges, implement rate limits and firewall policy, and monitor for abuse. **A working public relay has not been deployed here.**
+
+For a no-Microsoft-login UGN server, a separate, explicitly configured **offline-mode** server can accept unauthenticated Java names, but that's vulnerable to username impersonation. Don't disable authentication on your existing production UGN network. Isolate the offline-mode server, use a robust account registration/login plugin and secure proxy forwarding, and do not expose unprotected backend ports. Offline-mode does not verify ownership of Minecraft or grant distribution rights.
+
+## Privacy and licensing
+
+- The outer UGN page collects no passwords or Microsoft tokens.
+- The upstream game client may store singleplayer worlds, UI settings, and optional account session data in the browser. **Session-only credential handling has not been verified inside upstream.** Do not promise that feature until audited.
+- MIT licensing applies to the **web-client source code**. It does not grant rights to distribute Mojang/Microsoft software, proprietary assets or trademarks. Review actual generated bundle contents and Minecraft's usage rules before public release.
+- The site is an independent community project, not affiliated with Mojang Studios or Microsoft.
+
+See `THIRD_PARTY_NOTICES.md` for upstream attribution.
+
+## Project files
+
+```
+index.html              UGN game-first homepage and in-page game workspace
+styles.css              Base 3D site styling, game view and dialogs
+landing.css             Eaglercraft-inspired simple play page, original UGN design
+scene.js                Procedural, original WebGL2 portal
+app.js                  Game manifest verification, iframe and fullscreen lifecycle
+client-config.js        Public client and manifest paths
+favicon.svg             Original UGN icon
+THIRD_PARTY_NOTICES.md  Source attribution and license
 .github/workflows/deploy-java.yml
 .github/workflows/validate.yml
 ```
-
-This project is independent and not affiliated with Mojang or Microsoft. All rights to their names and content remain with their respective owners.
