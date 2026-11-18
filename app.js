@@ -1,11 +1,11 @@
 (() => {
   "use strict";
-  // UGN outer UI never asks for passwords, creates player profiles, or stores login tokens.
-  // The separately built upstream Java-compatible client controls its own world and account settings.
+  // Game launch stays on the UGN website, but uses its OWN top-level document
+  // rather than an iframe. Browser pointer lock is tied to the active document.
+  // Do not collect Minecraft passwords or Microsoft tokens in this wrapper.
   const $ = (id) => document.getElementById(id);
   const scene = $("experience");
   const workspace = $("game-space");
-  const mount = $("game-mount");
   const placeholder = $("engine-placeholder");
   const status = $("game-status");
   const dialog = $("information");
@@ -18,13 +18,12 @@
   const readiness = $("client-readiness");
   const cardStatus = $("portal-client-status");
   const config = window.UGN_JAVA_CONFIG || {};
-  let frame = null;
+  const buildMetadata = String(config.buildMetadataPath || "./client/ugn-build.json");
+  const clientPath = String(config.clientPath || "./client/index.html");
   let loading = false;
   let visible = false;
   let buildPromise = null;
-  let requestNumber = 0;
-  const buildMetadata = String(config.buildMetadataPath || "./client/ugn-build.json");
-  const clientPath = String(config.clientPath || "./client/index.html");
+  let navigationId = 0;
 
   function note(text, value) {
     if (readiness) readiness.textContent = text;
@@ -39,9 +38,6 @@
     window.UGNScene?.setActive(!show);
     if (show) exit.focus({ preventScroll: true });
     else enter.focus({ preventScroll: true });
-    if (!show && document.fullscreenElement && workspace.contains(document.fullscreenElement)) {
-      document.exitFullscreen().catch(() => {});
-    }
   }
 
   async function getBuild() {
@@ -50,36 +46,31 @@
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 10000);
       try {
-        const metaUrl = new URL(buildMetadata, document.baseURI);
-        const clientUrl = new URL(clientPath, document.baseURI);
-        if (metaUrl.origin !== location.origin || clientUrl.origin !== location.origin) {
-          throw new Error("The game client must be hosted on the same site.");
+        const manifestUrl = new URL(buildMetadata, document.baseURI);
+        const gameUrl = new URL(clientPath, document.baseURI);
+        if (manifestUrl.origin !== location.origin || gameUrl.origin !== location.origin) {
+          throw new Error("The Java browser client must be hosted on the UGN website.");
         }
-        const response = await fetch(metaUrl.href, {
-          method: "GET",
-          cache: "no-store",
-          redirect: "error",
-          credentials: "same-origin",
-          signal: controller.signal
+        const response = await fetch(manifestUrl.href, {
+          cache: "no-store", redirect: "error",
+          credentials: "same-origin", signal: controller.signal
         });
         if (!response.ok || !response.headers.get("content-type")?.includes("application/json")) {
-          throw new Error("The compiled Java browser client has not been deployed.");
+          throw new Error("The compiled Java browser game has not been deployed.");
         }
         const manifest = await response.json();
-        if (!manifest || manifest.client !== "minecraft-web-client" || !/^[a-f0-9]{40}$/.test(manifest.upstreamCommit)) {
-          throw new Error("Unrecognized or incomplete UGN game build.");
+        if (!manifest || manifest.client !== "minecraft-web-client" ||
+          !/^[a-f0-9]{40}$/.test(manifest.upstreamCommit)) {
+          throw new Error("The deployed game build is incomplete or unrecognized.");
         }
-        const htmlResponse = await fetch(clientUrl.href, {
-          method: "GET",
-          cache: "no-store",
-          redirect: "error",
-          credentials: "same-origin",
-          signal: controller.signal
+        const gameResponse = await fetch(gameUrl.href, {
+          cache: "no-store", redirect: "error",
+          credentials: "same-origin", signal: controller.signal
         });
-        if (!htmlResponse.ok || !htmlResponse.headers.get("content-type")?.includes("text/html")) {
+        if (!gameResponse.ok || !gameResponse.headers.get("content-type")?.includes("text/html")) {
           throw new Error("The game entrypoint is missing.");
         }
-        return { url: clientUrl.href, manifest };
+        return { url: gameUrl.href, manifest };
       } finally {
         clearTimeout(timer);
       }
@@ -97,84 +88,36 @@
     placeholder.hidden = false;
     note("BUILD NOT VERIFIED", "Game build unavailable");
     const description = placeholder.querySelector("p");
-    if (description) description.textContent = (error instanceof Error ? error.message : "The client is unavailable.") +
-      " Check the repository's GitHub Actions deployment. No simulated game will be displayed.";
+    if (description) description.textContent =
+      (error instanceof Error ? error.message : "The game could not be opened.") +
+      " Check GitHub Actions for a successful Java-client deployment.";
   }
 
   async function probeBuild() {
     try {
       const { manifest } = await getBuild();
-      note("CLIENT FILES FOUND", "Compiled files available");
-      // This is a file-deployment check, NOT proof of a loaded world or network connection.
-      const detail = `Pinned source: ${manifest.upstreamCommit.slice(0, 7)}`;
-      if (cardStatus) cardStatus.title = detail;
+      note("CLIENT FILES FOUND", "Compiled client available");
+      if (cardStatus) cardStatus.title = `Pinned Java client: ${manifest.upstreamCommit.slice(0, 7)}`;
     } catch {
       note("BUILD PENDING", "Game files not deployed");
     }
   }
 
   async function openGame() {
-    setVisibility(true);
-    if (frame) {
-      frame.hidden = false;
-      status.textContent = "CLICK INSIDE THE GAME TO LOOK AROUND";
-      placeholder.hidden = true;
-      frame.focus({ preventScroll: true });
-      return;
-    }
     if (loading) return;
     loading = true;
-    const ownRequest = ++requestNumber;
-    status.textContent = "CHECKING GAME FILES";
+    const request = ++navigationId;
+    setVisibility(true);
+    placeholder.hidden = false;
+    status.textContent = "VERIFYING JAVA GAME BUILD";
     try {
       const { url } = await getBuild();
-      if (!visible || ownRequest !== requestNumber) return;
-      const iframe = document.createElement("iframe");
-      iframe.id = "ugn-java-client";
-      iframe.title = "UGN Java compatible browser game";
-      iframe.tabIndex = 0;
-      // Same-origin, unsandboxed client: browser mouse capture must be requested
-      // by an actual click INSIDE the game iframe, not by an outer-page click.
-      iframe.src = url;
-      iframe.allow = "fullscreen; gamepad; clipboard-read; clipboard-write";
-      iframe.allowFullscreen = true;
-      iframe.referrerPolicy = "same-origin";
-      iframe.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;background:#050611;z-index:2";
-      iframe.addEventListener("load", () => {
-        if (frame !== iframe) return;
-        status.textContent = "CLICK INSIDE THE GAME TO LOOK AROUND";
-        // The game owns its keyboard and mouse focus. Focus here improves
-        // iframe keyboard routing without trying to bypass user activation.
-        iframe.focus({ preventScroll: true });
-        try {
-          const gameDoc = iframe.contentDocument;
-          if (!gameDoc) return;
-          gameDoc.addEventListener("pointerlockchange", () => {
-            if (!visible || frame !== iframe) return;
-            status.textContent = gameDoc.pointerLockElement
-              ? "MOUSE CAPTURED · ESC TO RELEASE"
-              : "CLICK INSIDE THE GAME TO LOOK AROUND";
-          });
-          gameDoc.addEventListener("pointerlockerror", () => {
-            if (visible && frame === iframe) {
-              status.textContent = "MOUSE CAPTURE BLOCKED · CLICK GAME AGAIN";
-            }
-          });
-        } catch (error) {
-          // The client is expected to be same-origin. If a future deployment
-          // changes that, it can still capture the pointer in its own document.
-          console.warn("Cannot observe game cursor-capture status", error);
-        }
-      });
-      iframe.addEventListener("error", () => {
-        if (frame === iframe) frame = null;
-        iframe.remove();
-        showMissing(new Error("The browser could not load the game entrypoint."));
-      });
-      frame = iframe;
-      placeholder.hidden = true;
-      status.textContent = "OPENING JAVA GAME";
-      mount.appendChild(iframe);
+      if (!visible || request !== navigationId) return;
+      status.textContent = "OPENING GAME IN THIS TAB";
+      // Deliberately do NOT embed another document. Firefox/Chromium mouse
+      // capture is more reliable when the game is the top-level document.
+      // Same origin and the same /client/ route preserve browser world storage.
+      window.location.assign(url);
     } catch (error) {
       if (visible) showMissing(error);
     } finally {
@@ -183,10 +126,8 @@
   }
 
   function leaveGame() {
-    requestNumber++;
+    navigationId += 1;
     setVisibility(false);
-    // Keep a loaded game in the tab, preserving in-game progress unless the upstream client exits.
-    if (frame) frame.hidden = true;
   }
 
   enter.addEventListener("click", () => { void openGame(); });
@@ -198,16 +139,17 @@
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else if (workspace.requestFullscreen) await workspace.requestFullscreen();
-      else status.textContent = "FULLSCREEN IS NOT SUPPORTED";
+      else status.textContent = "FULLSCREEN UNAVAILABLE";
     } catch {
-      status.textContent = "FULLSCREEN NOT AVAILABLE";
+      status.textContent = "FULLSCREEN UNAVAILABLE";
     }
   });
   window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && visible && !dialog.open && !document.fullscreenElement && document.activeElement !== frame) {
+    if (event.key === "Escape" && visible && !dialog.open && !document.fullscreenElement) {
       leaveGame();
     }
   });
+
   async function loadFeaturedServer() {
     const name = $("featured-name");
     const description = $("featured-description");
@@ -243,7 +185,6 @@
       address.textContent = "SET UP SERVER-CONFIG.JSON";
     }
   }
-  // No fake online statuses, fabricated servers, or fake 26.3 compatibility.
   void probeBuild();
   void loadFeaturedServer();
 })();
