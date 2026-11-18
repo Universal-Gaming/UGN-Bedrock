@@ -60,7 +60,7 @@ next = replaceOnce(next,
 fs.writeFileSync(componentFile, next);
 
 const css = read(stylesheetFile);
-const theme = String.raw\`
+const theme = String.raw`
 
 /* UGN Java MC Browser Edition — customized from the MIT upstream client.
  * Pixel-sharp cosmic presentation. Does not replace gameplay HUD or menus.
@@ -228,6 +228,6 @@ const theme = String.raw\`
     .root::before, .root::after, .splash { animation: none !important; }
     .menu button { transition: none !important; }
 }
-\`;
+`;
 fs.writeFileSync(stylesheetFile, css + theme);
 console.log("UGN menu themed: original game actions preserved, original credits retained.");
