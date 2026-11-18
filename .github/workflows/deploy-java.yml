@@ -80,6 +80,13 @@ jobs:
           grep -q 'ugn-drag' upstream/src/controls.ts
           grep -q 'ugnMouseStats.cameraUpdates' upstream/src/cameraRotationControls.ts
 
+      - name: Safely reject server joins before the UGN relay is ready
+        run: |
+          node --check ugn/scripts/fix-server-connection.mjs
+          node ugn/scripts/fix-server-connection.mjs upstream
+          grep -q 'UGN Browser Connection' upstream/src/index.ts
+          grep -q 'UGN Browser Relay' upstream/src/index.ts
+
       - name: Build genuine Java-compatible browser client
         working-directory: upstream
         env:
