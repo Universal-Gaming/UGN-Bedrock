@@ -1,0 +1,13 @@
+{
+  "featuredServer": {
+    "enabled": false,
+    "name": "[UGN] Universal Java",
+    "description": "The official UGN browser community server — coming after a compatible server and gateway are deployed.",
+    "host": "",
+    "port": 25565
+  },
+  "relay": {
+    "url": ""
+  },
+  "extraServers": []
+}
