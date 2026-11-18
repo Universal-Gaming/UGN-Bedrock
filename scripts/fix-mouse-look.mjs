@@ -23,7 +23,7 @@ const previous = original.slice(begin, end);
 if (!previous.includes("document.documentElement.requestPointerLock({") || !previous.includes("this.justHitEscape = false")) {
   throw new Error("Unexpected upstream mouse capture implementation; refusing unsafe blind edit.");
 }
-const replacement = \`export const pointerLock = {
+const replacement = `export const pointerLock = {
   get hasPointerLock () {
     return document.pointerLockElement
   },
@@ -59,6 +59,6 @@ const replacement = \`export const pointerLock = {
   }
 }
 
-\`;
+`;
 fs.writeFileSync(sourcePath, original.slice(0, begin) + replacement + original.slice(end));
 console.log("[UGN mouse] Patched pointer lock to use synchronous standard mouse capture.");
