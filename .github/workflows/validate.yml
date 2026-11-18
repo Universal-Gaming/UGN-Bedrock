@@ -21,6 +21,7 @@ jobs:
       - name: Validate JavaScript syntax
         run: |
           node --check app.js
+          node --check mouse-test.js
           node --check scene.js
           node --check client-config.js
           node --check scripts/theme-client.mjs
@@ -33,6 +34,9 @@ jobs:
           test -s index.html
           test -s styles.css
           test -s app.js
+          test -s mouse-test.html
+          test -s mouse-test.css
+          test -s mouse-test.js
           test -s scene.js
           test -s client-config.js
           test -s THIRD_PARTY_NOTICES.md
@@ -42,6 +46,7 @@ jobs:
           test -s scripts/fix-mouse-look.mjs
           test -s scripts/test-mouse-look.mjs
           test -s scripts/install-mouse-controls.mjs
+          grep -q 'ugn-free-look' scripts/install-mouse-controls.mjs
           grep -q 'game-mount' index.html
           grep -q 'space-scene' index.html
           grep -q 'window.location.assign(gameUrl.href)' app.js
