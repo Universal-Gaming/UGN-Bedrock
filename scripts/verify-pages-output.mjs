@@ -38,7 +38,11 @@ if(cfg?.featuredServer?.enabled){
   console.log("[UGN Pages verify] Featured Java server:",expected);
   const builtConfig=path.resolve(process.argv[3]||"./upstream/config.json");
   const embedded=readJson(builtConfig);
-  if(embedded?.defaultHost!==expected)errors.push("Featured server differs from client defaultHost");
+  if(cfg.relay?.url){
+    if(embedded?.defaultHost!==expected)errors.push("Configured relay but game default server does not match featured UGN address");
+  } else if (embedded?.defaultHost) {
+    errors.push("Game must not auto-connect to a raw TCP server before a relay is configured");
+  }
   if(!embedded?.promoteServers?.some(x=>x.ip===expected))errors.push("Featured server absent from game menu");
   if(!cfg.relay?.url)console.warn("[UGN Pages verify] The featured address cannot be joined from a browser until a secure relay is configured.");
 }
