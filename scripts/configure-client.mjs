@@ -41,6 +41,16 @@ config.defaultUsername="UGNPlayer{0-9999}";
 config.rightSideText="UGN JAVA | MC BROWSER EDITION";
 config.splashText="ONE NETWORK. YOUR NEXT ADVENTURE.";
 config.splashTextFallback="WELCOME TO UGN JAVA.";
+config.pauseLinks=[
+  [
+    {type:"url",url:"https://universalgaming.us/",text:"UGN Website"},
+    {type:"url",url:"https://discord.universalgaming.us/",text:"UGN Discord"}
+  ]
+];
+// Do not promote upstream map, P2P or other hosted services by default.
+config.mapsProvider="";
+config.p2pRelayServer="";
+
 const relay=custom.relay?.url || "";
 if(relay){
   if(!urlOk(relay))throw new Error("Relay must be an https:// or wss:// URL pointing to your controlled service.");
