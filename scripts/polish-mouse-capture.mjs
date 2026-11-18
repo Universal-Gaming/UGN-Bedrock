@@ -75,12 +75,11 @@ const newButton = [
 controls = replaceOnce(controls, oldButton, newButton, "capture button pointerdown");
 
 // Do not claim the pointer is confined while fallback free look is active.
-controls = replaceOnce(
-  controls,
-  "FREE LOOK ACTIVE · MOVE MOUSE (ESC TO STOP)",
-  "FREE LOOK · CURSOR NOT LOCKED · CLICK TO RETRY",
-  "fallback HUD short status (first occurrence)"
-);
+const previousFallback = "FREE LOOK ACTIVE · MOVE MOUSE (ESC TO STOP)";
+if (controls.split(previousFallback).length - 1 !== 2) {
+  throw new Error("Unexpected fallback status labels in UGN mouse installer");
+}
+controls = controls.replaceAll(previousFallback, "FREE LOOK · CURSOR NOT LOCKED · CLICK TO RETRY");
 controls = replaceOnce(
   controls,
   "ugnCaptureStatus('BROWSER BLOCKED LOCK · FREE LOOK ACTIVE')",
