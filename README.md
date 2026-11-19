@@ -76,3 +76,7 @@ The homepage now includes an Apps section. First-party Electron Windows / macOS 
 ## Proxy presets in app version 0.2.0
 
 The four default upstream community WebSocket-to-TCP relays have been restored to the UGN Java multiplayer UI, and desktop installers now provide a native Proxies menu. These providers are third parties, not UGN infrastructure, and connection quality/availability is not guaranteed. No direct Minecraft TCP connection is attempted without a selected proxy. A future UGN-owned WSS relay can replace them. See `apps/README.md`.
+
+## Performance diagnostics
+
+Open `diagnostics.html` from the homepage to benchmark visible-tab frame pacing, inspect WebGL compatibility and device capabilities, and measure the response time of this website. The website measurement is **not** Minecraft server ping or WebSocket-relay RTT. The test never reads world saves or credentials. Users can enable a low-impact homepage preference (disables the decorative WebGL scene), safely restore effects, and copy a privacy-safe report. For actual Minecraft lag compare singleplayer vs multiplayer, in-game FPS, relay and server TPS/MSPT; browser diagnostics do not claim to measure those. The build packages all three diagnostic files via GitHub Actions.
