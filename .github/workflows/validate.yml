@@ -24,6 +24,10 @@ jobs:
           node --check apps/apps.js
           python -m py_compile apps/icons/make-icons.py
           node --check diagnostics.js
+          node --check game-performance.js
+          node --check scripts/install-game-performance.mjs
+          node --check scripts/test-install-game-performance.mjs
+          node scripts/test-install-game-performance.mjs
           node --check mouse-test.js
           node --check scene.js
           node --check client-config.js
@@ -56,6 +60,9 @@ jobs:
           test -s manifest.webmanifest
           test -s .github/workflows/build-apps.yml
           grep -q 'id="apps"' index.html
+          test -s game-performance.js
+          test -s scripts/install-game-performance.mjs
+          test -s scripts/test-install-game-performance.mjs
           test -s diagnostics.html
           test -s diagnostics.css
           test -s diagnostics.js
