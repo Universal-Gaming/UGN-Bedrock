@@ -3,6 +3,8 @@
 /* Original instanced WebGL2 UGN voxel station. Presentation only, not Minecraft gameplay. */
 const canvas=document.getElementById("space-scene"), root=document.getElementById("experience");
 if(!canvas||!root)return;
+// Preserve user-selected lower-impact homepage mode; does not alter the game engine.
+try { if(localStorage.getItem("ugn-lightweight-home")==="1"){canvas.hidden=true;window.UGNScene={available:false,setActive(){}};return;} } catch {}
 const coarse=matchMedia("(pointer:coarse)").matches, reduced=matchMedia("(prefers-reduced-motion:reduce)").matches;
 const gl=canvas.getContext("webgl2",{alpha:true,antialias:true,depth:true,powerPreference:"low-power"});
 if(!gl){canvas.hidden=true;window.UGNScene={available:false,setActive(){}};return;}
