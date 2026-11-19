@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080b20">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>UGN Java | Performance Diagnostics</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./diagnostics.css">
+<script src="./diagnostics.js" defer></script>
+</head><body>
+<header><a class="brand" href="./">UGN <span>JAVA</span></a><nav><a href="./client/index.html">PLAY GAME</a><a href="./mouse-test.html">MOUSE TEST</a><a href="./">HOME</a></nav></header>
+<main>
+<div class="eyebrow">UGN / COMMAND CENTER / PERFORMANCE</div>
+<h1>GAME <em>DIAGNOSTICS</em></h1>
+<p class="lede">Find out whether your lag comes from device rendering, browser load, or the network. These tests run locally except for harmless requests to the current UGN website. They never delete worlds, cookies, settings or credentials.</p>
+<section class="actions" aria-label="Diagnostic controls"><button id="run" type="button">RUN ALL SAFE TESTS</button><button id="fps" type="button" class="secondary">RETEST FRAME RATE</button><button id="copy" class="secondary" type="button">COPY SAFE REPORT</button></section>
+<div class="tiles" aria-live="polite">
+<article><div>FRAME RATE TEST</div><strong id="fps-value">—</strong><small id="fps-note">Not tested</small></article>
+<article><div>FRAME SPIKES</div><strong id="spikes-value">—</strong><small id="spikes-note">Not tested</small></article>
+<article><div>WEBSITE RESPONSE</div><strong id="latency-value">—</strong><small id="latency-note">Not tested · not game-server ping</small></article>
+<article><div>WEBGL RENDERER</div><strong id="webgl-value">—</strong><small id="webgl-note">Checking compatibility</small></article>
+</div>
+<section class="panel"><h2>TEST STATUS</h2><p id="status" role="status" aria-live="polite">Ready. For meaningful frame results, keep this tab visible and avoid switching windows during the 6-second test.</p><div class="meter"><div id="progress"></div></div></section>
+<section class="panel"><h2>RECOMMENDED ADJUSTMENTS</h2><ul id="tips"><li>Run diagnostics to receive device-specific recommendations.</li></ul></section>
+<section class="panel"><h2>DEVICE & BROWSER</h2><dl id="details"></dl><p class="fine">These are browser-reported capabilities, not a benchmark of Minecraft simulation. A smooth diagnostic animation does not guarantee high Minecraft FPS.</p></section>
+<section class="panel"><h2>SAFE TROUBLESHOOTING</h2>
+<div class="fixes"><button id="less-motion" type="button" class="secondary">USE LIGHTWEIGHT HOMEPAGE</button><button id="normal-motion" type="button" class="secondary">RESTORE HOMEPAGE EFFECTS</button><button id="reload" type="button" class="secondary">RELOAD PAGE</button></div>
+<p class="fine">The lightweight preference only controls UGN's animated homepage; it cannot change the upstream Minecraft engine's FPS. In-game, lower render distance, simulation distance, particles and graphics settings. Compare singleplayer against multiplayer to identify relay/server lag. Never clear site storage as a first troubleshooting step—browser worlds may be stored there.</p>
+</section>
+<section class="panel"><h2>ABOUT NETWORK LAG</h2><p id="network-explain">The website test measures the trip to this GitHub Pages site, not to a Minecraft server, relay, or world host. Actual multiplayer ping and packet jitter require a connected game/relay and cannot be truthfully inferred from this page.</p><p class="fine">If singleplayer runs smoothly but multiplayer rubber-bands, check the chosen WebSocket relay and Minecraft server TPS/MSPT. If both modes stutter, investigate FPS, WebGL and browser memory first.</p></section>
+<pre id="report" aria-label="Privacy-safe diagnostics summary"></pre>
+</main><footer>UNIVERSAL GAMING NETWORK · PERFORMANCE COMMAND CENTER</footer>
+</body></html>
