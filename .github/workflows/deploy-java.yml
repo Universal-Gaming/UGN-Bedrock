@@ -74,6 +74,11 @@ jobs:
           node ugn/scripts/test-strict-lowest-ping.mjs upstream
           node -e "const c=require('./upstream/config.json'); if(!Array.isArray(c.promoteServers)) process.exit(1); console.log('UGN promoted server count:',c.promoteServers.length)"
 
+      - name: Install and verify optional UGN renderer
+        run: |
+          node --experimental-strip-types ugn/scripts/test-ugn-renderer.mjs
+          node ugn/scripts/install-ugn-renderer.mjs upstream
+
       - name: Apply UGN in-game main menu theme
         run: |
           node --check ugn/scripts/theme-client.mjs
