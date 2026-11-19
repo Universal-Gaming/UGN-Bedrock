@@ -176,3 +176,82 @@ replace(entities, `        const dx = entity.position.x - botPos.x
         const dz = pos.z - botPos.z`)
 replace(entities, 'const sectionKey = this.worldRenderer.entitySectionKey(entity.position.x, entity.position.y, entity.position.z)',
   'const sectionKey = this.worldRenderer.entitySectionKey(pos.x, pos.y, pos.z)')
+
+write(path.join(renderer, 'ugnMobAnimation.ts'), fs.readFileSync(new URL('./ugn-mob-animation.ts', import.meta.url), 'utf8'))
+replace(entities, "import * as THREE from 'three'", "import * as THREE from 'three'\nimport { UgnGait, deathRoll } from '../ugnMobAnimation'")
+replace(entities, '      let limbAnimation: ReturnType<typeof updateHorseHeadAnimationFrame> | undefined', `      let limbAnimation: ReturnType<typeof updateHorseHeadAnimationFrame> | undefined
+      if (ugn && (horseAnimation || entity.userData[LEG_ANIMATION_USER_DATA_KEY] || entity.userData._ugnParts?.length)) {
+        const gait = entity.userData._ugnGait ??= new UgnGait()
+        const pos = this.worldRenderer.sceneOrigin.getWorldPosition(entity)
+        if (pos) gait.advance(pos.x, pos.z, dt)
+        limbAnimation = { limbSwing: gait.phase, limbSwingAmount: gait.amount }
+      }`)
+replace(entities, '        limbAnimation = updateHorseHeadAnimationFrame(horseAnimation, dt)', '        limbAnimation ??= updateHorseHeadAnimationFrame(horseAnimation, dt)')
+
+// EntityMesh.update in this pinned renderer is a no-op. Authored GLTF clips
+// already advance via onBeforeRender. Avoid traversing every bone every frame.
+replace(entities, '      entity.traverse(child => {\n        if (child instanceof Entity.EntityMesh)', '      if (!ugn) entity.traverse(child => {\n        if (child instanceof Entity.EntityMesh)')
+
+const bridge = path.join(root, 'src/appViewer.ts')
+replace(bridge, '      deadEntities.add(e.id)\n      appViewer.worldView?.emit', `      deadEntities.add(e.id)
+      if (appViewer.backend?.id === 'ugn') {
+        appViewer.worldView?.emit('entity', { id: e.id, ugnDeath: true })
+        return
+      }
+      appViewer.worldView?.emit`)
+replace(bridge, '      deadEntities.delete(e.id)\n      appViewer.worldView?.emit', `      if (deadEntities.delete(e.id) && appViewer.backend?.id === 'ugn') return
+      appViewer.worldView?.emit`)
+replace(bridge, '    entitySpawn (e: any) {', `    entitySpawn (e: any) {
+      deadEntities.delete(e.id)
+      if (appViewer.backend?.id === 'ugn') appViewer.worldView?.emit('entity', { id: e.id, ugnRespawn: true })`)
+replace(bridge, '    respawn () {\n      void appViewer', '    respawn () {\n      deadEntities.clear()\n      void appViewer')
+
+replace(entities, '    const justAdded = !e\n\n    if (entity.delete)', `    const justAdded = !e
+    if (entity.ugnDeath) {
+      if (e && e.userData._ugnDeathStarted === undefined) {
+        e.userData._ugnDeathStarted = performance.now()
+        e.userData._posTween?.stop()
+        e.userData._rotTween?.stop()
+      }
+      return
+    }
+    if (entity.ugnRespawn) {
+      if (e?.userData._ugnDeathStarted !== undefined) this.update({ id: entity.id, delete: true }, {})
+      return
+    }
+
+    if (entity.delete)`)
+replace(entities, '      const isPlayerEntity = entityIdRaw', `      if (entity.userData._ugnDeathStarted !== undefined) {
+        const elapsed = performance.now() - entity.userData._ugnDeathStarted
+        if (elapsed >= 1000) this.update({ id: entityIdRaw, delete: true }, {})
+        else entity.rotation.z = deathRoll(elapsed)
+        continue
+      }
+
+      const isPlayerEntity = entityIdRaw`)
+write(path.join(renderer, 'ugnMobParts.ts'), fs.readFileSync(new URL('./ugn-mob-parts.ts', import.meta.url), 'utf8'))
+replace(entities, "import { UgnGait, deathRoll } from '../ugnMobAnimation'", "import { UgnGait, deathRoll } from '../ugnMobAnimation'\nimport { bindMobParts, poseMobParts } from '../ugnMobParts'")
+replace(entities, '      const legRig = isPlayerModel ? undefined', `      if (this.worldRenderer.initOptions.rendererSpecificSettings?.ugnPolicy && !isPlayerModel && !entity.customModel) {
+        const parts = bindMobParts(mesh, entity.name)
+        if (parts.length) e.userData._ugnParts = parts
+      }
+      const legRig = isPlayerModel ? undefined`)
+replace(entities, '        limbAnimation = { limbSwing: gait.phase, limbSwingAmount: gait.amount }', `        limbAnimation = { limbSwing: gait.phase, limbSwingAmount: gait.amount }
+        if (entity.userData._ugnParts) poseMobParts(entity.userData._ugnParts, performance.now() / 1000, gait.phase, gait.amount, entity.originalEntity.onGround === false, (performance.now() - (entity.userData._ugnSwingAt ?? -Infinity)) / 1000)`)
+replace(entities, '        if (ugnMotion) {\n          e.userData._ugnMoveTarget = {', '        if (ugnMotion) {\n          e.originalEntity.onGround = entity.onGround ?? e.originalEntity.onGround\n          e.userData._ugnMoveTarget = {')
+
+replace(entities, "    const playerObject =\n      entityPlayerId === 'player_entity'", `    if (this.worldRenderer.initOptions.rendererSpecificSettings?.ugnPolicy && entityPlayerId !== 'player_entity') {
+      const target = this.entities[entityPlayerId]
+      if (!target?.playerObject) {
+        if (target && animation === 'oneSwing') target.userData._ugnSwingAt = performance.now()
+        return
+      }
+    }
+    const playerObject =
+      entityPlayerId === 'player_entity'`)
+
+// Scene membership already has an O(1) parent pointer. Scanning the entire
+// scene's children for each mob every display frame is expensive at spawn.
+replace(entities, 'if (!this.worldRenderer.scene.children.includes(ent)) this.worldRenderer.scene.add(ent)',
+  'if (ent.parent !== this.worldRenderer.scene) this.worldRenderer.scene.add(ent)')
+replace(entities, '      } else {\n        this.worldRenderer.scene.remove(ent)', '      } else if (ent.parent === this.worldRenderer.scene) {\n        this.worldRenderer.scene.remove(ent)')

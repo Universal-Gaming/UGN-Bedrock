@@ -87,12 +87,14 @@ const policy = run(three + 'entity/interpolationPolicy.ts', {})
 const rendererRequire = createRequire(fs.realpathSync(path.join(root, 'node_modules/minecraft-renderer/package.json')))
 const tweenEntry = rendererRequire.resolve('@tweenjs/tween.js')
 const tween = await import(path.join(path.dirname(tweenEntry), 'tween.esm.js'))
+const mobMotion = run('node_modules/minecraft-renderer/src/ugnMobAnimation.ts', {})
 const {Entities} = run(three + 'entities.ts', {performance: {now: () => now}}, {
+  '../ugnMobAnimation': mobMotion,
   '@tweenjs/tween.js': tween,
   './entity/interpolationPolicy': policy,
   './threeJsUtils': {loadThreeJsTextureFromUrl() {}}
 })
-const mob = {rotation: {y:0}, userData:{}, position: {set(x,y,z){Object.assign(this,{x,y,z})}}}
+const mob = {originalEntity:{}, rotation: {y:0}, userData:{}, position: {set(x,y,z){Object.assign(this,{x,y,z})}}}
 const scene = Object.assign(Object.create(Entities.prototype), {
   worldRenderer: {initOptions: {rendererSpecificSettings: {ugnPolicy:{}}}, sceneOrigin: {getWorldPosition: () => ({x:0,y:0,z:0})}},
   entities: {1:mob}, applyEntityRenderHints() {}
@@ -141,3 +143,108 @@ assert.equal(mob.visible,true)
 assert.deepEqual(sections,[[actual.x,actual.y,actual.z]])
 assert.equal(animationDelta,0.05)
 console.log('UGN visibility and low-frame-rate animation checks passed')
+
+// Drive the actual packaged model geometry, not a dummy moving position.
+const threeDir = path.dirname(path.dirname(rendererRequire.resolve('three')))
+const THREE = await import(path.join(threeDir,'build/three.module.js'))
+const {OBJLoader} = await import(path.join(threeDir,'examples/jsm/loaders/OBJLoader.js'))
+const parts = run('node_modules/minecraft-renderer/src/ugnMobParts.ts', {}, {three:THREE})
+const geometry = run(three+'entity/EntityMesh.ts', {}, {three:THREE,vec3:{Vec3},'../threeJsUtils':{loadTexture(){}}})
+const legs = run(three+'entity/legWalkAnimation.ts', {}, {three:THREE})
+const definitions = JSON.parse(fs.readFileSync(path.join(root,three,'entity/entities.json'),'utf8'))
+for (const name of ['cow','zombie','skeleton','pig','sheep']) {
+  const model = geometry.getMesh(undefined,'unused.png',definitions[name].geometry.default)
+  const rig = legs.createLegRig(model,name)
+  assert.ok(rig?.legs.length >= 2, name)
+  const index = model.skeleton.bones.findIndex(b => /leg/i.test(b.name))
+  const skin = model.geometry.getAttribute('skinIndex')
+  let vertex = 0
+  while (vertex < skin.count && skin.getX(vertex)!==index) vertex++
+  assert.ok(vertex < skin.count)
+  model.updateMatrixWorld(true)
+  const before = model.getVertexPosition(vertex,new THREE.Vector3())
+  const gait = new mobMotion.UgnGait()
+  for(let tick=0;tick<20;tick++) gait.advance(tick*0.12,0,0.05)
+  legs.applyLegRig(rig,gait.phase,gait.amount)
+  model.updateMatrixWorld(true)
+  assert.ok(before.distanceTo(model.getVertexPosition(vertex,new THREE.Vector3()))>0.001,name+' foot vertex should move')
+}
+for (const [modelName,count] of [['spider',8],['cod',1],['ghast',9],['allay',2]]) {
+  const model = new OBJLoader().parse(fs.readFileSync(path.join(root,three,'entity/models/'+modelName+'.obj'),'utf8'))
+  const joints = parts.bindMobParts(model,modelName)
+  assert.equal(joints.length,count,modelName)
+  parts.poseMobParts(joints,0.28,1.5,0.7,true)
+  assert.ok(joints.some(j=>Math.abs(j.pivot.rotation[j.motion.axis]-j.rest)>0.01))
+}
+
+// Check that a death event keeps the original model long enough to actually
+// see the roll and schedules exactly one normal removal, without a stale timer.
+const original = scene.entities[1]
+scene.update({id:1,ugnDeath:true},{})
+const started = original.userData._ugnDeathStarted
+assert.ok(Number.isFinite(started))
+now += 250
+scene.update({id:1,ugnDeath:true},{})
+scene.render()
+assert.ok(original.rotation.z>0 && original.rotation.z<Math.PI/2)
+assert.equal(original.userData._ugnDeathStarted,started)
+const removals=[]
+scene.update = ({id,delete:remove})=>{assert.ok(remove);removals.push(id);delete scene.entities[id]}
+now += 760
+scene.render()
+scene.render()
+assert.deepEqual(removals,['1'])
+console.log('Packaged mob vertex, named-joint and death lifecycle checks passed')
+
+// Confirm the normal per-frame entity path actually poses the model, even
+// when the server does not send another move between these display frames.
+const rendererModules = {
+  three:THREE, '@tweenjs/tween.js':tween,
+  './threeJsUtils':{loadThreeJsTextureFromUrl(){}},
+  './entity/legWalkAnimation':legs, '../ugnMobAnimation':mobMotion,
+  './entity/interpolationPolicy':policy, '../ugnMobParts':parts,
+  './entity/horseHeadAnimation':run(three+'entity/horseHeadAnimation.ts', {}, {three:THREE}),
+  './entity/EntityMesh':{EntityMesh:class {}}
+}
+const Integrated = run(three+'entities.ts',{performance:{now:()=>now}},rendererModules).Entities
+const zombie = geometry.getMesh(undefined,'test.png',definitions.zombie.geometry.default)
+const group = new THREE.Group()
+group.add(zombie)
+group.originalEntity={name:'zombie',onGround:true}
+group.userData[legs.LEG_RIG_USER_DATA_KEY]=legs.createLegRig(zombie,'zombie')
+group.userData[legs.LEG_ANIMATION_USER_DATA_KEY]={}
+group.userData._ugnParts=parts.bindMobParts(zombie,'zombie')
+const actor=Object.assign(Object.create(Integrated.prototype),scene,{
+  entities:{7:group},
+  update:Integrated.prototype.update,
+  worldRenderer:{...scene.worldRenderer,sceneOrigin:{getWorldPosition:obj=>obj.position}}
+})
+const packet={id:7,name:'zombie',position:{x:0,y:72,z:0},yaw:0}
+actor.updateEntityPosition(packet,true,{})
+for(let tick=0;tick<10;tick++) {
+  packet.position.x+=0.15
+  actor.updateEntityPosition(packet,false,{})
+  for(let frame=0;frame<3;frame++) {
+    group.userData._posTween.update(performance.now()+frame*20,false)
+    actor.render()
+  }
+}
+assert.ok(group.userData._ugnGait.amount>0)
+assert.ok(group.userData[legs.LEG_RIG_USER_DATA_KEY].legs.some(l=>Math.abs(l.bone.rotation.x)>0.01))
+actor.playAnimation(7,'oneSwing')
+const arm=group.userData._ugnParts.find(j=>j.motion.strike)
+assert.ok(arm)
+now+=90
+actor.render()
+assert.ok(arm.pivot.rotation.x < -0.4,'attack must rotate the zombie arm')
+console.log('Interpolated zombie model walks and attacks through the entity render loop')
+
+const crowded = new THREE.Scene()
+const targets = Object.fromEntries(Array.from({length:120},(_,id)=>[id,new THREE.Group()]))
+const attachment = Object.assign(Object.create(Integrated.prototype),{entities:targets,worldRenderer:{scene:crowded}})
+attachment.setSceneAttached(true)
+attachment.setSceneAttached(true)
+assert.equal(crowded.children.length,120)
+attachment.setSceneAttached(false)
+assert.equal(crowded.children.length,0)
+console.log('Crowded scene attach/detach checks passed')
