@@ -120,6 +120,13 @@ jobs:
           DISABLE_SERVICE_WORKER: 'true'
         run: pnpm build
 
+      - name: Install opt-in gameplay performance monitor
+        run: |
+          node --check ugn/game-performance.js
+          node --check ugn/scripts/install-game-performance.mjs
+          node ugn/scripts/test-install-game-performance.mjs
+          node ugn/scripts/install-game-performance.mjs upstream
+
       - name: Verify compiled client and assemble GitHub Pages
         shell: bash
         run: |
