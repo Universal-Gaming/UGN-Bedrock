@@ -23,6 +23,7 @@ jobs:
           node --check app.js
           node --check apps/apps.js
           python -m py_compile apps/icons/make-icons.py
+          node --check diagnostics.js
           node --check mouse-test.js
           node --check scene.js
           node --check client-config.js
@@ -55,6 +56,10 @@ jobs:
           test -s manifest.webmanifest
           test -s .github/workflows/build-apps.yml
           grep -q 'id="apps"' index.html
+          test -s diagnostics.html
+          test -s diagnostics.css
+          test -s diagnostics.js
+          grep -q 'href="./diagnostics.html"' index.html
           test -s mouse-test.html
           test -s mouse-test.css
           test -s mouse-test.js
