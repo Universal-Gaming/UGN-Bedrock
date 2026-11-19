@@ -1,7 +1,7 @@
 {
   "name": "ugn-java-desktop",
-  "version": "0.2.0",
-  "description": "UGN Java Windows/macOS client with selectable Minecraft WebSocket community relays",
+  "version": "0.3.0",
+  "description": "UGN Java desktop client with lowest-ping automatic proxy mode and optional UGN private relay",
   "main": "main.cjs",
   "private": true,
   "license": "MIT",

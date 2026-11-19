@@ -215,7 +215,7 @@ function createRelay(settings = readConfig()) {
     wss.handleUpgrade(req, socket, head, (ws) => {
       if (u.pathname === paths.ping) {
         ws.on('message', (data, binary) => {
-          if (!binary && String(data).startsWith('ping:')) ws.send('pong:' + String(data).slice(5));
+          if (!binary && String(data).startsWith('ping:')) ws.send('pong:' + String(data).slice(5) + ':0');
         });
         return;
       }
@@ -225,7 +225,7 @@ function createRelay(settings = readConfig()) {
       ws.on('message', (data, binary) => {
         if (!binary) {
           const message = String(data);
-          if (message.startsWith('ping:')) { ws.send('pong:' + message.slice(5)); return; }
+          if (message.startsWith('ping:')) { ws.send('pong:' + message.slice(5) + ':0'); return; }
           ws.close(1003, 'Binary TCP data required');
           return;
         }

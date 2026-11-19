@@ -139,3 +139,7 @@ GET /healthz -> process health and concurrent session count.
 
 The proxy server is UGN-controlled, but the browser game still runs from GitHub
 Pages unless you separately move the website to your own host.
+
+## Client automatic relay choice
+
+The client now uses **Auto · Lowest ping** by default for new installs and measures actual successful ping replies before selecting a relay. It will ignore proxy.universalgaming.us while it is not running. The UGN relay implements the browser ping response format with a zero-millisecond server-processing field. Deploy and verify the relay before expecting it to be selected. User-initiated manual proxy preferences remain unchanged.

@@ -38,3 +38,13 @@ test('reject arbitrary proxy injection into desktop game URL',()=>{
     assert.throws(()=>gameWithProxy(invalid),TypeError);
   }
 });
+
+const { UGN_PROXY, ALL_PROXIES } = require('./proxies.cjs');
+test('UGN-owned proxy can be manually selected without being imposed as a default',()=>{
+  assert.equal(UGN_PROXY.url,'https://proxy.universalgaming.us');
+  assert.equal(ALL_PROXIES.length,5);
+  assert.equal(proxyIsCommunity(UGN_PROXY.url),false);
+  const app=new URL(gameWithProxy(UGN_PROXY.url));
+  assert.ok(isUGNPage(app.href));
+  assert.equal(app.searchParams.get('proxy'),UGN_PROXY.url);
+});

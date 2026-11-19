@@ -1,7 +1,7 @@
 'use strict';
 const { app, BrowserWindow, Menu, session, shell, dialog } = require('electron');
 const { HOME, isUGNPage, canOpenExternal } = require('./url-policy.cjs');
-const { COMMUNITY_PROXIES, gameWithProxy } = require('./proxies.cjs');
+const { UGN_PROXY, COMMUNITY_PROXIES, gameWithProxy } = require('./proxies.cjs');
 
 let mainWindow;
 app.setAppUserModelId('us.universalgaming.java');
@@ -66,8 +66,11 @@ function createWindow() {
       { type: 'separator' }, { role: 'quit' }
     ]},
     { label: 'Proxies', submenu: [
-      { label: 'Choose in-game: Multiplayer → Proxy → Manage proxies', click: () => void win.loadURL(new URL('client/index.html', HOME).href) },
+      { label: 'Auto-select · Lowest ping (choose in Multiplayer)', click: () => void win.loadURL(new URL('client/index.html', HOME).href) },
       { type: 'separator' },
+      { label: 'UGN Private · requires hosting setup', click: () => void win.loadURL(gameWithProxy(UGN_PROXY.url)) },
+      { type: 'separator' },
+      { label: 'Third-party alternatives', enabled: false },
       ...COMMUNITY_PROXIES.map(provider => ({
         label: 'Use ' + provider.name,
         click: () => {
@@ -80,8 +83,8 @@ function createWindow() {
       { label: 'About community relays', click: () => void dialog.showMessageBox(win, {
         type: 'info',
         title: 'UGN Java — Multiplayer Proxies',
-        message: 'These four proxy endpoints are community-operated, not UGN-owned.',
-        detail: 'They bridge your game session to Minecraft Java servers. Selecting one sends Minecraft network traffic through that third-party provider. Availability and privacy practices are outside UGN’s control. Our dedicated UGN relay is not configured yet. Use a relay you trust and avoid sending credentials to unknown providers.',
+        message: 'Automatic mode picks the lowest-ping healthy relay. UGN also has its own private relay option.',
+        detail: 'Automatic mode compares available relays and skips failed checks; it does not force UGN. The UGN private relay needs DNS, TLS and a Pterodactyl server before it can connect. Community alternatives are operated by third parties, so review privacy implications before using them.',
         buttons: ['OK']
       }) }
     ]}

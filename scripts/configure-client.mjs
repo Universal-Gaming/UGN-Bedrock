@@ -55,8 +55,10 @@ const communityProxies = [
   "https://proxy3.mcraft.fun",
   "https://pwc.koyeb.app"
 ];
+// UGN is a candidate, never a forced default. An offline proxy is skipped.
+const UGN_PRIVATE_PROXY = "https://proxy.universalgaming.us";
 config.defaultProxy = "";
-config.defaultProxies = communityProxies;
+config.defaultProxies = [...communityProxies, UGN_PRIVATE_PROXY];
 config.defaultUsername="UGNPlayer{0-9999}";
 config.rightSideText="UGN JAVA | MC BROWSER EDITION";
 config.splashText="ONE NETWORK. YOUR NEXT ADVENTURE.";
@@ -100,8 +102,8 @@ config.p2pRelayServer="";
 const relay=custom.relay?.url || "";
 if(relay){
   if(!urlOk(relay))throw new Error("Relay must be an https:// or wss:// URL pointing to your controlled service.");
-  config.defaultProxy=relay;
-  config.defaultProxies=[relay];
+  // An available private relay joins the latency race rather than replacing it.
+  if(!config.defaultProxies.includes(relay)) config.defaultProxies.push(relay);
 }
 fs.writeFileSync(configPath,JSON.stringify(config,null,2)+"\n");
 console.log("UGN client configured: "+displayed.length+" promoted servers; UGN relay "+(relay?"configured":"not yet configured")+".");

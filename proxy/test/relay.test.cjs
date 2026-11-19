@@ -110,7 +110,7 @@ test('in-house relay handles Minecraft browser protocol and blocks unsafe routin
     assert.equal(received.bytes.toString(),'UGN Java binary test');
     const waiting=message(gameSocket);
     gameSocket.send('ping:test-123');
-    assert.equal((await waiting).bytes.toString(),'pong:test-123');
+    assert.equal((await waiting).bytes.toString(),'pong:test-123:0');
     const limit=await request('/api/vm/net/connect',minecraftAddress);
     assert.equal(limit.status,429,'Per-IP concurrent connection cap must be enforced');
   });
@@ -118,7 +118,7 @@ test('in-house relay handles Minecraft browser protocol and blocks unsafe routin
     const ping=await connectWebsocket(websocket+'/api/vm/net/ping',browserOrigin);
     const result=message(ping);
     ping.send('ping:123');
-    assert.equal((await result).bytes.toString(),'pong:123');
+    assert.equal((await result).bytes.toString(),'pong:123:0');
     ping.close();
     const denied=await timeout(new Promise(resolve=>{
       const ws=new WebSocket(websocket+'/api/vm/net/ping',{headers:{Origin:'https://attacker.example'}});

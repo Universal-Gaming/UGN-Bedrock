@@ -30,7 +30,19 @@
       if(!Array.isArray(data.assets))throw Error('No release assets');
       let count=0;
       for(const p of platforms){
-        const asset=data.assets.find(a=>p.test(a)&&a.state==='uploaded'&&a.size>10000);
+        // The preview release may contain old installers alongside new ones.
+        // Always show the highest semantic version available for each OS.
+        const versionOf=(name)=>{
+          const m=name.match(/(\d+)\.(\d+)\.(\d+)/);
+          return m?[+m[1],+m[2],+m[3]]:[0,0,0];
+        };
+        const assets=data.assets.filter(a=>p.test(a)&&a.state==='uploaded'&&a.size>10000);
+        assets.sort((a,b)=>{
+          const aa=versionOf(a.name),bb=versionOf(b.name);
+          for(let i=0;i<3;i++){if(bb[i]!==aa[i])return bb[i]-aa[i];}
+          return 0;
+        });
+        const asset=assets[0];
         setLink(p.id,asset);
         if(asset)count++;
       }
