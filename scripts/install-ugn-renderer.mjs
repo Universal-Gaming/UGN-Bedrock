@@ -86,6 +86,38 @@ replace(world, '    for (let y = this.worldMinYRender; y < this.worldSizeParams.
       const loc = new Vec3(x, y, z)`)
 replace(world, "import { Vec3 } from 'vec3'", "import { Vec3 } from 'vec3'\nimport { sectionOrder } from '../ugnRendererPolicy'")
 
+// Column keys contain x,z. Three.js updates its x,y,z section draw order
+// on camera-section crossings and geometry installation.
+const columnScan = `    for (const [key, value] of Object.entries(this.loadedChunks)) {
+      if (!value) continue
+      this.updatePosDataChunk?.(key)
+    }`
+replace(world, columnScan, `    if (!this.initOptions.rendererSpecificSettings?.ugnPolicy) {
+${columnScan.split('\n').map(line => '  ' + line).join('\n')}
+    }`)
+
+const meshManager = path.join(renderer, 'three/chunkMeshManager.ts')
+replace(meshManager, '  updateSectionsVisibility(): void {', `  updateSectionsVisibility(): void {
+    if (this.worldRenderer.initOptions.rendererSpecificSettings?.ugnPolicy) {
+      const camera = this.worldRenderer.cameraSectionPos
+      const limit = this.performanceOverrideDistance
+      const radius = Math.floor(limit) + 1
+      for (const key in this.sectionObjects) {
+        const section = this.sectionObjects[key]
+        let visible = !section._waitingForChunkDisplay
+        if (visible && limit) {
+          // The mesher stores horizontal section centers at base + 8.
+          const x = Math.floor(section.worldX! / 16)
+          const z = Math.floor(section.worldZ! / 16)
+          const dx = x - camera.x
+          const dz = z - camera.z
+          visible = limit >= 0 && dx * dx + dz * dz < radius * radius
+        }
+        if (section.visible !== visible) section.visible = visible
+      }
+      return
+    }`)
+
 // Keep an in-flight move when a head-look or metadata packet repeats its
 // destination. Snapshot coordinates: Mineflayer may reuse position objects.
 const entities = path.join(renderer, 'three/entities.ts')

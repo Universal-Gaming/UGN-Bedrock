@@ -320,3 +320,43 @@ terrain.abortController.abort()
 callbacks.shift()()
 assert.deepEqual(received,ids)
 console.log('Chunk burst preserved all 150 results in order across changing budgets, pause and shutdown')
+
+function loadMethod(file, className, methodName) {
+  const ast = ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true)
+  const cls = ast.statements.find(n => ts.isClassDeclaration(n) && n.name?.text === className)
+  const method = cls.members.find(n => n.name?.getText() === methodName)
+  return vm.runInNewContext(ts.transpileModule( '(class { ' + method.getText() + ' })', {
+    compilerOptions: {target: ts.ScriptTarget.ES2022}
+  }).outputText).prototype[methodName]
+}
+const updateVisibility = loadMethod(path.join(root, three, 'chunkMeshManager.ts'), 'ChunkMeshManager', 'updateSectionsVisibility')
+const testSections = {}
+for (let x = -16; x <= 16; x++) {
+  for (let z = -16; z <= 16; z++) {
+    testSections[[16*x, 0, 16*z]] = {worldX:16*x+8, worldZ:16*z+8, _waitingForChunkDisplay:x===z}
+  }
+}
+const settings = {}
+const manager = {sectionObjects: testSections, worldRenderer: {cameraSectionPos:{x:-2,z:3},initOptions:{rendererSpecificSettings:settings}}}
+for (const limit of [0, 1, 4, 7.5, 12, 0]) {
+  manager.performanceOverrideDistance = limit
+  settings.ugnPolicy = undefined
+  updateVisibility.call(manager)
+  const expected = Object.values(testSections).map(s => s.visible)
+  for (const section of Object.values(testSections)) section.visible = !section.visible
+  settings.ugnPolicy = {}
+  updateVisibility.call(manager)
+  assert.deepEqual(Object.values(testSections).map(s => s.visible), expected)
+}
+const updateViewer = loadMethod(worldFile, 'WorldRendererCommon', 'updateViewerPosition')
+const positions = []
+const viewer = {
+  initOptions: {rendererSpecificSettings:settings},
+  loadedChunks: new Proxy({}, {ownKeys(){throw Error('scanned columns')}}),
+  sendWorkers(msg){positions.push([msg.x,msg.z])},
+  onViewerChunkPositionChanged(){}
+}
+for (const x of [0, 1, 16, -1]) updateViewer.call(viewer, {x,y:64,z:0})
+assert.deepEqual(positions, [[0,0],[1,0],[-1,0]])
+assert.equal(viewer.viewerChunkPosition.x, -1)
+console.log('Terrain visibility matched across 1,089 sections and six distance settings. Worker notifications preserved.')
