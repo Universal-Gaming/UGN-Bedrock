@@ -57,24 +57,30 @@ replace(documentRenderer, '      this.frameRender(sizeChanged)', `      const po
 const world = path.join(renderer, 'lib/worldrendererCommon.ts')
 replace(world, '  async processMessageQueue(source: string) {', `  private ugnFramePending = false
 
-  private scheduleUgnMeshResults(budget: number) {
+  private scheduleUgnMeshResults() {
     if (this.ugnFramePending || !this.active || !this.messageQueue.length) return
     this.ugnFramePending = true
     requestAnimationFrame(() => {
       this.ugnFramePending = false
       if (!this.active || this.abortController.signal.aborted) return
-      const deadline = performance.now() + budget
-      while (!this.stopMesherMessagesProcessing && this.messageQueue.length) {
-        this.handleMessage(this.messageQueue.shift()!)
-        if (performance.now() >= deadline) break
+      const deadline = performance.now() + this.initOptions.rendererSpecificSettings.ugnPolicy.meshBudgetMs
+      const queue = this.messageQueue
+      let consumed = 0
+      try {
+        while (queue === this.messageQueue && !this.stopMesherMessagesProcessing && consumed < queue.length) {
+          this.handleMessage(queue[consumed++])
+          if (performance.now() >= deadline) break
+        }
+      } finally {
+        if (consumed) queue.splice(0, consumed)
       }
-      if (this.messageQueue.length) this.scheduleUgnMeshResults(budget)
+      if (this.messageQueue.length) this.scheduleUgnMeshResults()
     })
   }
 
   async processMessageQueue(source: string) {
     const policy = this.initOptions.rendererSpecificSettings?.ugnPolicy
-    if (policy) return this.scheduleUgnMeshResults(policy.meshBudgetMs)`)
+    if (policy) return this.scheduleUgnMeshResults()`)
 replace(world, '    for (let y = this.worldMinYRender; y < this.worldSizeParams.worldHeight; y += sectionHeight) {\n      const loc = new Vec3(x, y, z)', `    const feet = this.initOptions.rendererSpecificSettings?.ugnPolicy ? this.viewerChunkPosition?.y : undefined
     for (const y of sectionOrder(this.worldMinYRender, this.worldSizeParams.worldHeight, sectionHeight, feet)) {
       const loc = new Vec3(x, y, z)`)
@@ -279,3 +285,11 @@ replace(entities,'      let limbAnimation: ReturnType<typeof updateHorseHeadAnim
 replace(entities,'        const pos = this.worldRenderer.sceneOrigin.getWorldPosition(entity)\n        if (pos) gait.advance(pos.x, pos.z, dt)',
   '        gaitPosition = this.worldRenderer.sceneOrigin.getWorldPosition(entity)\n        if (gaitPosition) gait.advance(gaitPosition.x, gaitPosition.z, dt)')
 replace(entities,'const pos = ugn ? origin.getWorldPosition(entity) ?? {','const pos = ugn ? gaitPosition ?? origin.getWorldPosition(entity) ?? {')
+
+replace(documentRenderer,'        this.pendingResize = false\n      }', `        this.pendingResize = false
+        const policy = this.initOptions.rendererSpecificSettings?.ugnPolicy
+        if (policy?.resize(window.devicePixelRatio || 1, this.currentWidth * this.currentHeight)) {
+          this.renderer.setPixelRatio(policy.ratio)
+          sizeChanged = true
+        }
+      }`)

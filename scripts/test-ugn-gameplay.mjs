@@ -281,3 +281,42 @@ assert.ok(villager.yaw>0 && villager.yaw<0.1)
 assert.ok(!nose.matrixWorld.equals(noseBefore))
 assert.equal(parts.bindMobLook(village,'horse'),undefined)
 console.log('Head-only packet, head/body vertex separation, villager facial parts and wrapped yaw passed')
+
+const worldFile=path.join(root,'node_modules/minecraft-renderer/src/lib/worldrendererCommon.ts')
+const worldSource=ts.createSourceFile(worldFile,fs.readFileSync(worldFile,'utf8'),ts.ScriptTarget.Latest,true)
+const worldClass=worldSource.statements.find(node=>ts.isClassDeclaration(node)&&node.name?.text==='WorldRendererCommon')
+const pump=worldClass.members.find(member=>member.name?.getText()==='scheduleUgnMeshResults')
+const harnessJS=ts.transpileModule('class TerrainPump { '+pump.getText()+' }\nexports.Pump=TerrainPump', {
+  compilerOptions:{target:ts.ScriptTarget.ES2022}
+}).outputText
+const terrainExports={}, callbacks=[]
+let frameClock=0
+vm.runInNewContext(harnessJS,{exports:terrainExports,performance:{now:()=>frameClock},requestAnimationFrame:cb=>callbacks.push(cb)})
+const ids=Array.from({length:150},(_,i)=>i)
+const received=[]
+const terrainPolicy={meshBudgetMs:5}
+const terrain=Object.assign(new terrainExports.Pump(),{
+  messageQueue:[...ids],active:true,abortController:new AbortController(),
+  initOptions:{rendererSpecificSettings:{ugnPolicy:terrainPolicy}},
+  handleMessage(id){received.push(id);frameClock++}
+})
+terrain.scheduleUgnMeshResults()
+terrain.scheduleUgnMeshResults()
+assert.equal(callbacks.length,1)
+callbacks.shift()()
+assert.equal(received.length,5)
+terrainPolicy.meshBudgetMs=1
+callbacks.shift()()
+assert.equal(received.length,6)
+terrain.stopMesherMessagesProcessing=true
+callbacks.shift()()
+assert.equal(received.length,6)
+terrain.stopMesherMessagesProcessing=false
+while(callbacks.length) callbacks.shift()()
+assert.deepEqual(received,ids)
+terrain.messageQueue.push(999)
+terrain.scheduleUgnMeshResults()
+terrain.abortController.abort()
+callbacks.shift()()
+assert.deepEqual(received,ids)
+console.log('Chunk burst preserved all 150 results in order across changing budgets, pause and shutdown')

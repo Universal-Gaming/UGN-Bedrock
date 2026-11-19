@@ -24,3 +24,23 @@ assert.equal(policy.ratio, policy.maxRatio)
 const hugeDisplay = new UgnRendererPolicy(16, 16, 3, 8000000)
 assert.ok(hugeDisplay.maxRatio < 1)
 console.log('UGN renderer policy checks passed')
+
+const pacing = new UgnRendererPolicy(8,8,3,800*600)
+let clock = 100
+function advance(count, interval, target) {
+  for(let i=0;i<count;i++) pacing.sample(clock+=interval,target)
+}
+advance(45,40,60)
+assert.equal(pacing.meshBudgetMs,1)
+advance(360,1000/30,30)
+assert.equal(pacing.meshBudgetMs,5)
+advance(1,4000,30)
+assert.equal(pacing.meshBudgetMs,5)
+assert.equal(pacing.resize(3,3840*2160),true)
+assert.ok(pacing.ratio*pacing.ratio*3840*2160 <= 3600001)
+const wideRatio = pacing.ratio
+assert.equal(pacing.resize(2,800*600),false)
+assert.equal(pacing.ratio,wideRatio)
+advance(1500,1000/60,60)
+assert.ok(pacing.ratio>wideRatio)
+console.log('Adaptive terrain pacing, 30 FPS cap, tab resume and viewport changes passed')
