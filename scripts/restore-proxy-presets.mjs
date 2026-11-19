@@ -40,5 +40,8 @@ const autoDisplay = "selectedValue === AUTO_OPTION ? 'Auto-select' :";
 if (s.split(autoOption).length !== 2 || s.split(autoDisplay).length !== 2) throw new Error('Upstream auto label changed');
 s=s.replace(autoOption,"{ value: AUTO_OPTION, label: 'Auto · Lowest ping' }");
 s=s.replace(autoDisplay,"selectedValue === AUTO_OPTION ? 'Auto · Lowest ping' :");
+const previousDisplay = "  const proxiesData = snap.proxiesData ?? getProxiesData()";
+if (s.split(previousDisplay).length !== 2) throw new Error('Upstream saved proxy display changed');
+s=s.replace(previousDisplay, "  const proxiesData = getProxiesData()");
 fs.writeFileSync(file,s);
 console.log('[UGN proxies] Restored relays for new users and legacy empty saved lists.');

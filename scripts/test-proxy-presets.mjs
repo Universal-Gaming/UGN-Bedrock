@@ -21,4 +21,5 @@ for(const url of expected){
 const patched=fs.readFileSync(path.join(upstream,'src/react/ServersList.tsx'),'utf8');
 assert.ok(patched.includes('const missing = defaults.filter('),'Legacy saved candidates migrated');
 assert.ok(patched.includes('Auto · Lowest ping'),'Clear latency mode label');
+assert.ok(patched.includes('const proxiesData = getProxiesData()'),'Saved proxy list UI must display newly introduced candidates');
 console.log('[UGN proxies] PASS: 4 community + UGN candidate, manual choices kept, auto mode.');
