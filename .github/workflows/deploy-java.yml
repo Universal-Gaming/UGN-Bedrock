@@ -99,6 +99,7 @@ jobs:
           node ugn/scripts/restore-block-interactions.mjs upstream
           node --check ugn/scripts/test-block-interactions.mjs
           node ugn/scripts/test-block-interactions.mjs upstream
+          node ugn/scripts/test-ugn-gameplay.mjs upstream
           grep -q 'UGNMouseDiagnostics?.fallbackActive' upstream/src/mineflayer/plugins/mouse.ts
           grep -q "onGamePointerDown" upstream/src/react/GlobalOverlayHints.tsx
           grep -q "const [hasClickedGame, setHasClickedGame]" upstream/src/react/GlobalOverlayHints.tsx

@@ -109,3 +109,52 @@ replace(camera, '        this.currentCameraMovementMode = movementMode\n        
           this.currentPosTween.update(performance.now(), false)
         }
         this.currentPosTween?.stop()`)
+
+// 1. Touch drags use incremental deltas. Dropping one loses part of the
+// gesture permanently. Use the same pitch for the camera and simulated player.
+const look = path.join(root, 'src/cameraRotationControls.ts')
+replace(look, 'if (now - lastMouseMove < 4 && !options.preciseMouseInput) return',
+  "if (options.activeRenderer !== 'ugn' && now - lastMouseMove < 4 && !options.preciseMouseInput) return")
+replace(look, '  appViewer.backend?.updateCamera(null, clampedYaw, pitch)',
+  "  appViewer.backend?.updateCamera(null, clampedYaw, options.activeRenderer === 'ugn' ? Math.max(minPitch, Math.min(maxPitch, pitch)) : pitch)")
+
+// 2. The UGN backend implements the stable backendMethods API. Both accessors
+// must recognize it so mining, placement and offhand events reach the mesh.
+const methods = path.join(renderer, 'three/threeJsMethods.ts')
+const methodsSource = fs.readFileSync(methods, 'utf8')
+const guard = "renderer?.id !== 'threejs' || !renderer.backendMethods"
+if (methodsSource.split(guard).length !== 3) throw new Error('Unexpected Three.js method guards')
+write(methods, methodsSource.replaceAll(guard, "(renderer?.id !== 'threejs' && renderer?.id !== 'ugn') || !renderer.backendMethods"))
+
+const cursor = path.join(renderer, 'three/world/cursorBlock.ts')
+replace(cursor, "import { loadThreeJsTextureFromUrl } from '../threeJsUtils'", "import { loadThreeJsTextureFromUrlSync } from '../threeJsUtils'")
+replace(cursor, 'void loadThreeJsTextureFromUrl(destroyStagesImages[i]).then(texture => {',
+  'void loadThreeJsTextureFromUrlSync(destroyStagesImages[i]).promise.then(texture => {')
+replace(cursor, '      })\n    }\n\n    const breakMaterial', "      }).catch(error => console.warn('Mining crack texture failed:', i, error))\n    }\n\n    const breakMaterial")
+replace(cursor, '        this.breakTextures.push(texture)', `        this.breakTextures[i] = texture
+        const digging = this.worldRenderer.playerStateReactive.diggingBlock
+        if (digging?.stage === i) this.updateBreakAnimation(digging, i, digging.mergedShape)`)
+replace(cursor, '    const { position: _position, width, height, depth } = mergedShape', `    const texture = this.breakTextures[stage]
+    if (!texture) return
+    const { position: _position, width, height, depth } = mergedShape`)
+replace(cursor, 'this.breakTextures[stage] ?? this.breakTextures.at(-1)', 'texture')
+
+// 3. Base a moving mob's display interval on successive distinct positions.
+// Pauses and bursts must not turn the next ordinary movement into a long glide.
+replace(entities, '        const ANIMATION_DURATION = getEntityTweenDurationMs(entity, justAdded)', `        let ANIMATION_DURATION = getEntityTweenDurationMs(entity, justAdded)
+        if (ugnMotion) {
+          const now = performance.now()
+          const interval = now - (e.userData._ugnMoveAt ?? now)
+          e.userData._ugnMoveAt = now
+          const cadence = e.userData._ugnMoveMs ?? 100
+          e.userData._ugnMoveMs = interval >= 25 && interval <= 250
+            ? Math.max(50, Math.min(150, cadence * 0.5 + interval * 0.5))
+            : interval > 250 ? 100 : cadence
+          if (ANIMATION_DURATION) ANIMATION_DURATION = e.userData._ugnMoveMs
+        }`)
+replace(entities, "    if (typeof targetYaw === 'number' && Number.isFinite(targetYaw)) {", `    if (typeof targetYaw === 'number' && Number.isFinite(targetYaw) &&
+        (!ugnMotion || cameraSynced || e.userData._ugnTargetYaw !== targetYaw)) {
+      if (ugnMotion) {
+        e.userData._ugnTargetYaw = cameraSynced ? undefined : targetYaw
+        if (e.userData._rotTween?.isPlaying()) e.userData._rotTween.update(performance.now(), false)
+      }`)
