@@ -79,3 +79,33 @@ replace(world, '    for (let y = this.worldMinYRender; y < this.worldSizeParams.
     for (const y of sectionOrder(this.worldMinYRender, this.worldSizeParams.worldHeight, sectionHeight, feet)) {
       const loc = new Vec3(x, y, z)`)
 replace(world, "import { Vec3 } from 'vec3'", "import { Vec3 } from 'vec3'\nimport { sectionOrder } from '../ugnRendererPolicy'")
+
+// Keep an in-flight move when a head-look or metadata packet repeats its
+// destination. Snapshot coordinates: Mineflayer may reuse position objects.
+const entities = path.join(renderer, 'three/entities.ts')
+replace(entities, '    const cameraSynced = usesCameraSyncedVehiclePosition(entity)\n    if (entity.position)', `    const cameraSynced = usesCameraSyncedVehiclePosition(entity)
+    const ugnMotion = !!this.worldRenderer.initOptions.rendererSpecificSettings?.ugnPolicy
+    const previous = e.userData._ugnMoveTarget
+    if (entity.position)`)
+replace(entities, '        e.userData._localVehicleY = entity.position.y', `        if (ugnMotion) {
+          e.userData._ugnMoveTarget = undefined
+          e.userData._tweenTarget = undefined
+        }
+        e.userData._localVehicleY = entity.position.y`)
+replace(entities, '      } else {\n        const ANIMATION_DURATION = getEntityTweenDurationMs(entity, justAdded)', `      } else if (!ugnMotion || justAdded || !previous || previous.x !== entity.position.x ||
+          previous.y !== entity.position.y || previous.z !== entity.position.z) {
+        if (ugnMotion) {
+          e.userData._ugnMoveTarget = { x: entity.position.x, y: entity.position.y, z: entity.position.z }
+          if (e.userData._posTween?.isPlaying()) e.userData._posTween.update(performance.now(), false)
+        }
+        const ANIMATION_DURATION = getEntityTweenDurationMs(entity, justAdded)`)
+
+// A physics update may arrive between display frames. Carry the interpolated
+// position forward to that instant before retargeting local camera motion.
+const camera = path.join(renderer, 'three/worldRendererThree.ts')
+replace(camera, '        this.currentCameraMovementMode = movementMode\n        this.currentPosTween?.stop()', `        this.currentCameraMovementMode = movementMode
+        if (this.initOptions.rendererSpecificSettings?.ugnPolicy && movementMode === 'local-player' &&
+            !instant && this.currentPosTween?.isPlaying()) {
+          this.currentPosTween.update(performance.now(), false)
+        }
+        this.currentPosTween?.stop()`)
