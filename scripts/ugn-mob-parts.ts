@@ -90,3 +90,73 @@ export function poseMobParts(joints: Joint[], seconds: number, phase: number, am
     transform.decompose(pivot.position, pivot.quaternion, pivot.scale)
   }
 }
+
+// Flat OBJ models store a villager's nose and a chicken's beak beside the
+// head mesh. Rotate those pieces together around the base of the head.
+const objFaces: Record<string, string[]> = {
+  villager: ['head','nose','helmet','brim'],
+  zombie_villager: ['head','head layer','brim'],
+  chicken: ['head','beak','comb'],
+  creeper: ['head']
+}
+const trackedHeads = new Set(['zombie','husk','drowned','skeleton','stray','wither_skeleton','cow','mooshroom','pig','sheep', ...Object.keys(objFaces)])
+
+export function hasMobLook(name: string) {
+  return trackedHeads.has(name)
+}
+
+export function bindMobLook(root: THREE.Object3D, species: string) {
+  if (!hasMobLook(species)) return
+  const bones: Array<{node:THREE.Bone; before:THREE.Matrix4; after:THREE.Matrix4}> = []
+  root.updateWorldMatrix(true,true)
+  root.traverse(node => {
+    if (!(node instanceof THREE.SkinnedMesh)) return
+    for (const head of node.skeleton.bones) {
+      if (head.name.toLowerCase() !== 'bone_head') continue
+      const parent = head.parent instanceof THREE.Bone
+        ? node.matrixWorld.clone().invert().multiply(head.parent.matrixWorld) : new THREE.Matrix4()
+      const pivot = new THREE.Matrix4().makeTranslation(head.position.x, head.position.y, head.position.z)
+      bones.push({node:head,before:parent.clone().invert().multiply(pivot),
+        after:pivot.clone().invert().multiply(parent).multiply(head.matrix)})
+    }
+  })
+  let hinge: THREE.Group | undefined
+  const names = objFaces[species]
+  if (!bones.length && names) {
+    const head = root.children.find(n=>n.name.toLowerCase()==='head')
+    if (head instanceof THREE.Mesh) {
+      head.geometry.computeBoundingBox()
+      const box = head.geometry.boundingBox
+      if (box) {
+        hinge = new THREE.Group()
+        box.getCenter(hinge.position)
+        hinge.position.y = box.min.y
+        hinge.position.applyMatrix4(head.matrix)
+        root.add(hinge)
+        for (const node of [...root.children]) {
+          if (names.includes(node.name.toLowerCase())) hinge.attach(node)
+        }
+      }
+    }
+  }
+  if (hinge || bones.length) return {hinge,bones,yaw:0,pitch:0,targetYaw:NaN,targetPitch:0,posed:false}
+}
+
+const lookEuler = new THREE.Euler(0,0,0,'YXZ')
+export function poseMobLook(look: NonNullable<ReturnType<typeof bindMobLook>>, bodyYaw: number, dt: number) {
+  const delta = Number.isFinite(look.targetYaw) ? look.targetYaw - bodyYaw : 0
+  const target = THREE.MathUtils.clamp(Math.atan2(Math.sin(delta),Math.cos(delta)), -Math.PI/3, Math.PI/3)
+  const pitch = THREE.MathUtils.clamp(look.targetPitch,-Math.PI/2,Math.PI/2)
+  if (look.posed && look.yaw===target && look.pitch===pitch) return
+  const blend = -Math.expm1(-16 * dt)
+  look.yaw = Math.abs(target-look.yaw)<0.001 ? target : look.yaw+(target-look.yaw)*blend
+  look.pitch = Math.abs(pitch-look.pitch)<0.001 ? pitch : look.pitch+(pitch-look.pitch)*blend
+  look.posed = true
+  lookEuler.set(look.pitch,look.yaw,0,'YXZ')
+  look.hinge?.rotation.copy(lookEuler)
+  rotation.makeRotationFromEuler(lookEuler)
+  for (const joint of look.bones) {
+    transform.copy(joint.before).multiply(rotation).multiply(joint.after)
+    transform.decompose(joint.node.position,joint.node.quaternion,joint.node.scale)
+  }
+}

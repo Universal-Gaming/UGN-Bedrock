@@ -248,3 +248,36 @@ assert.equal(crowded.children.length,120)
 attachment.setSceneAttached(false)
 assert.equal(crowded.children.length,0)
 console.log('Crowded scene attach/detach checks passed')
+
+// Head-only movement packets must rotate the face without moving the feet.
+group.userData._ugnLook = parts.bindMobLook(zombie,'zombie')
+assert.ok(group.userData._ugnLook)
+function worldVertex(mesh, boneName) {
+  const id = mesh.skeleton.bones.findIndex(b => b.name === boneName)
+  const weights = mesh.geometry.getAttribute('skinIndex')
+  let i=0
+  while(i<weights.count && weights.getX(i)!==id) i++
+  assert.ok(i<weights.count,boneName)
+  mesh.updateWorldMatrix(true,true)
+  return mesh.getVertexPosition(i,new THREE.Vector3())
+}
+const faceBefore = worldVertex(zombie,'bone_head')
+const waistBefore = worldVertex(zombie,'bone_body')
+actor.updateEntityPosition({...packet,headYaw:0.7,pitch:0.25},false,{},true)
+actor.render()
+const head = group.userData._ugnLook
+assert.ok(head.yaw>0 && head.yaw<0.7 && head.pitch>0 && head.pitch<0.25)
+assert.ok(worldVertex(zombie,'bone_head').distanceTo(faceBefore)>0.01)
+assert.ok(worldVertex(zombie,'bone_body').distanceTo(waistBefore)<1e-6)
+const village = new OBJLoader().parse(fs.readFileSync(path.join(root,three,'entity/models/villager.obj'),'utf8'))
+const villager = parts.bindMobLook(village,'villager')
+const nose = village.getObjectByName('nose')
+assert.ok(villager && nose && nose.parent===villager.hinge)
+const noseBefore=nose.matrixWorld.clone()
+villager.targetYaw=-Math.PI+0.05
+parts.poseMobLook(villager,Math.PI-0.05,0.05)
+village.updateMatrixWorld(true)
+assert.ok(villager.yaw>0 && villager.yaw<0.1)
+assert.ok(!nose.matrixWorld.equals(noseBefore))
+assert.equal(parts.bindMobLook(village,'horse'),undefined)
+console.log('Head-only packet, head/body vertex separation, villager facial parts and wrapped yaw passed')

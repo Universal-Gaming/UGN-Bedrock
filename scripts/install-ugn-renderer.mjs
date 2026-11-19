@@ -255,3 +255,27 @@ replace(entities, "    const playerObject =\n      entityPlayerId === 'player_en
 replace(entities, 'if (!this.worldRenderer.scene.children.includes(ent)) this.worldRenderer.scene.add(ent)',
   'if (ent.parent !== this.worldRenderer.scene) this.worldRenderer.scene.add(ent)')
 replace(entities, '      } else {\n        this.worldRenderer.scene.remove(ent)', '      } else if (ent.parent === this.worldRenderer.scene) {\n        this.worldRenderer.scene.remove(ent)')
+
+replace(entities,"import { bindMobParts, poseMobParts }", "import { bindMobParts, poseMobParts, hasMobLook, bindMobLook, poseMobLook }")
+replace(entities, '        const parts = bindMobParts(mesh, entity.name)', `        e.userData._ugnLook = bindMobLook(mesh, entity.name)
+        const parts = bindMobParts(mesh, entity.name)`)
+// These models receive live angles in radians once per rendered frame.
+replace(entities, "const e = new Entity.EntityMesh('1.16.4', entityName, world, overrides)", `const liveLook = world.initOptions.rendererSpecificSettings?.ugnPolicy && !overrides.customModel && hasMobLook(entityName)
+      const e = new Entity.EntityMesh('1.16.4', entityName, world, liveLook
+        ? { ...overrides, rotation: { ...overrides.rotation, head: { x:0, y:0, z:0 } } } : overrides)`)
+replace(entities,'    this.applyEntityRenderHints(e, entity)\n    if (e.userData', `    this.applyEntityRenderHints(e, entity)
+    const look = e.userData._ugnLook
+    if (look) {
+      if (Number.isFinite(entity.headYaw)) look.targetYaw = entity.headYaw
+      if (Number.isFinite(entity.pitch)) look.targetPitch = entity.pitch
+    }
+    if (e.userData`)
+replace(entities,'      const horseHeadRig = entity.userData', `      if (entity.userData._ugnLook) poseMobLook(entity.userData._ugnLook, entity.rotation.y, dt)
+      const horseHeadRig = entity.userData`)
+
+// Gait and visibility use the same world position during this render pass.
+replace(entities,'      let limbAnimation: ReturnType<typeof updateHorseHeadAnimationFrame> | undefined',
+  "      let gaitPosition: ReturnType<typeof this.worldRenderer.sceneOrigin.getWorldPosition>\n      let limbAnimation: ReturnType<typeof updateHorseHeadAnimationFrame> | undefined")
+replace(entities,'        const pos = this.worldRenderer.sceneOrigin.getWorldPosition(entity)\n        if (pos) gait.advance(pos.x, pos.z, dt)',
+  '        gaitPosition = this.worldRenderer.sceneOrigin.getWorldPosition(entity)\n        if (gaitPosition) gait.advance(gaitPosition.x, gaitPosition.z, dt)')
+replace(entities,'const pos = ugn ? origin.getWorldPosition(entity) ?? {','const pos = ugn ? gaitPosition ?? origin.getWorldPosition(entity) ?? {')
