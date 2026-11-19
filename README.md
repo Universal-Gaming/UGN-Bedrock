@@ -72,3 +72,7 @@ THIRD_PARTY_NOTICES.md  Source attribution and license
 ## Installable UGN apps
 
 The homepage now includes an Apps section. First-party Electron Windows / macOS shells and an Android WebView APK are built and uploaded by the separate Build UGN Apps workflow, with dynamically verified release downloads. iPhone users can install the web app from Safari; the native iOS SwiftUI project is included but a signed device IPA requires Apple Developer credentials. See apps/README.md. App shells load the live browser game; they are not offline copies of Mojang's Java executable or automatic world-sync clients.
+
+## Proxy presets in app version 0.2.0
+
+The four default upstream community WebSocket-to-TCP relays have been restored to the UGN Java multiplayer UI, and desktop installers now provide a native Proxies menu. These providers are third parties, not UGN infrastructure, and connection quality/availability is not guaranteed. No direct Minecraft TCP connection is attempted without a selected proxy. A future UGN-owned WSS relay can replace them. See `apps/README.md`.

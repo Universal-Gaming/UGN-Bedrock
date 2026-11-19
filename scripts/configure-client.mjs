@@ -32,7 +32,11 @@ for(const item of extra.slice(0,16)){
     description:String(item.description || "").slice(0,160)
   });
 }
-// Make it UGN-only by default: no third-party promoted servers or public proxy list.
+// Only the featured server list is UGN-owned. Proxies are transport relays and
+// are distinct from promoted Minecraft servers. Offer the upstream-maintained
+// community relay choices while our first-party UGN relay is not deployed.
+// Public relays are third-party services; no uptime, trust, or compatibility
+// guarantees are implied. Users can override these in the game UI.
 config.promoteServers=displayed;
 // Pre-fill the actual UGN Minecraft server as the first choice. This does
 // not open a TCP socket itself; browser connections still require a relay.
@@ -42,8 +46,17 @@ config.promoteServers=displayed;
 const relayIsReady = typeof custom.relay?.url === "string" && Boolean(custom.relay.url);
 config.defaultHost = relayIsReady ? (displayed[0]?.ip || "") : "";
 config.allowAutoConnect = false;
-config.defaultProxy="";
-config.defaultProxies=[];
+// Restore the original upstream web-client's four proxy presets so the
+// first-party UGN Windows/macOS/Android/iOS shells can connect to Java servers.
+// The desktop application also exposes these choices in its native menu.
+const communityProxies = [
+  "https://proxy.mcraft.fun",
+  "https://proxy2.mcraft.fun",
+  "https://proxy3.mcraft.fun",
+  "https://pwc.koyeb.app"
+];
+config.defaultProxy = "";
+config.defaultProxies = communityProxies;
 config.defaultUsername="UGNPlayer{0-9999}";
 config.rightSideText="UGN JAVA | MC BROWSER EDITION";
 config.splashText="ONE NETWORK. YOUR NEXT ADVENTURE.";

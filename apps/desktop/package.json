@@ -1,12 +1,12 @@
 {
   "name": "ugn-java-desktop",
-  "version": "0.1.0",
-  "description": "UGN Java MC Browser Edition first-party desktop application",
+  "version": "0.2.0",
+  "description": "UGN Java Windows/macOS client with selectable Minecraft WebSocket community relays",
   "main": "main.cjs",
   "private": true,
   "license": "MIT",
   "scripts": {
-    "check": "node --check main.cjs && node --test test.cjs",
+    "check": "node --check main.cjs && node --check proxies.cjs && node --test test.cjs",
     "start": "electron .",
     "dist:win": "electron-builder --win nsis --x64 --publish never",
     "dist:mac:x64": "electron-builder --mac dmg --x64 --publish never",
@@ -28,7 +28,8 @@
       "main.cjs",
       "url-policy.cjs",
       "assets/icon.png",
-      "package.json"
+      "package.json",
+      "proxies.cjs"
     ],
     "win": {
       "target": "nsis",

@@ -19,3 +19,22 @@ test('third-party links open outside; non-web schemes blocked',()=>{
   assert.equal(canOpenExternal('file:///etc/passwd'),false);
   assert.equal(canOpenExternal(HOME+'client/index.html'),false);
 });
+
+const { COMMUNITY_PROXIES, gameWithProxy, proxyIsCommunity } = require('./proxies.cjs');
+test('UGN desktop ships four explicit proxy choices',()=>{
+  assert.equal(COMMUNITY_PROXIES.length,4);
+  assert.equal(new Set(COMMUNITY_PROXIES.map(p=>p.url)).size,4);
+  for(const relay of COMMUNITY_PROXIES) {
+    assert.match(relay.url,/^https:\/\//);
+    assert.ok(proxyIsCommunity(relay.url));
+    const url=new URL(gameWithProxy(relay.url));
+    assert.ok(isUGNPage(url.href));
+    assert.equal(url.searchParams.get('proxy'),relay.url);
+    assert.equal(url.pathname,'/UGN-Bedrock/client/index.html');
+  }
+});
+test('reject arbitrary proxy injection into desktop game URL',()=>{
+  for(const invalid of ['https://evil.example','http://proxy.mcraft.fun','javascript:alert(1)','']) {
+    assert.throws(()=>gameWithProxy(invalid),TypeError);
+  }
+});

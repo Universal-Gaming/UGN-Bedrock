@@ -64,6 +64,10 @@ jobs:
       - name: Apply UGN-only game menu configuration
         run: |
           node ugn/scripts/configure-client.mjs upstream ugn/server-config.json
+          node --check ugn/scripts/restore-proxy-presets.mjs
+          node ugn/scripts/restore-proxy-presets.mjs upstream
+          node --check ugn/scripts/test-proxy-presets.mjs
+          node ugn/scripts/test-proxy-presets.mjs upstream
           node -e "const c=require('./upstream/config.json'); if(!Array.isArray(c.promoteServers)) process.exit(1); console.log('UGN promoted server count:',c.promoteServers.length)"
 
       - name: Apply UGN in-game main menu theme

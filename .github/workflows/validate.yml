@@ -28,6 +28,8 @@ jobs:
           node --check client-config.js
           node --check scripts/theme-client.mjs
           node --check scripts/configure-client.mjs
+          node --check scripts/restore-proxy-presets.mjs
+          node --check scripts/test-proxy-presets.mjs
           node --check scripts/fix-mouse-look.mjs
           node --check scripts/test-mouse-look.mjs
           node --check scripts/install-mouse-controls.mjs
@@ -60,6 +62,8 @@ jobs:
           test -s .github/workflows/deploy-java.yml
           test -s scripts/theme-client.mjs
           test -s scripts/configure-client.mjs
+          test -s scripts/restore-proxy-presets.mjs
+          test -s scripts/test-proxy-presets.mjs
           test -s scripts/fix-mouse-look.mjs
           test -s scripts/test-mouse-look.mjs
           test -s scripts/install-mouse-controls.mjs

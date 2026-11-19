@@ -1,6 +1,7 @@
 'use strict';
 const { app, BrowserWindow, Menu, session, shell, dialog } = require('electron');
 const { HOME, isUGNPage, canOpenExternal } = require('./url-policy.cjs');
+const { COMMUNITY_PROXIES, gameWithProxy } = require('./proxies.cjs');
 
 let mainWindow;
 app.setAppUserModelId('us.universalgaming.java');
@@ -14,7 +15,7 @@ function createWindow() {
     width: 1280, height: 820, minWidth: 740, minHeight: 580,
     backgroundColor: '#080d20',
     show: false,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     icon: require('path').join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
       partition: 'persist:ugn-java',
@@ -59,9 +60,30 @@ function createWindow() {
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     { label: 'UGN Java', submenu: [
       { label: 'UGN Home', click: () => void win.loadURL(HOME) },
+      { label: 'Multiplayer / Proxy Selection', click: () => void win.loadURL(new URL('client/index.html', HOME).href) },
       { label: 'Reload', accelerator: 'CmdOrCtrl+R', click: () => win.webContents.reload() },
       { label: 'Fullscreen', accelerator: 'F11', click: () => win.setFullScreen(!win.isFullScreen()) },
       { type: 'separator' }, { role: 'quit' }
+    ]},
+    { label: 'Proxies', submenu: [
+      { label: 'Choose in-game: Multiplayer → Proxy → Manage proxies', click: () => void win.loadURL(new URL('client/index.html', HOME).href) },
+      { type: 'separator' },
+      ...COMMUNITY_PROXIES.map(provider => ({
+        label: 'Use ' + provider.name,
+        click: () => {
+          // Open only UGN's hosted game with a validated, explicit proxy.
+          // Never silently divert traffic without a user action.
+          void win.loadURL(gameWithProxy(provider.url));
+        }
+      })),
+      { type: 'separator' },
+      { label: 'About community relays', click: () => void dialog.showMessageBox(win, {
+        type: 'info',
+        title: 'UGN Java — Multiplayer Proxies',
+        message: 'These four proxy endpoints are community-operated, not UGN-owned.',
+        detail: 'They bridge your game session to Minecraft Java servers. Selecting one sends Minecraft network traffic through that third-party provider. Availability and privacy practices are outside UGN’s control. Our dedicated UGN relay is not configured yet. Use a relay you trust and avoid sending credentials to unknown providers.',
+        buttons: ['OK']
+      }) }
     ]}
   ]));
   void win.loadURL(HOME).catch(() => {
