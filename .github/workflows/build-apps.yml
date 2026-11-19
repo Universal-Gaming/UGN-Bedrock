@@ -29,10 +29,18 @@ jobs:
           python apps/icons/make-icons.py
       - name: Test launcher navigation and build Windows installer
         shell: pwsh
+        working-directory: apps/desktop
         run: |
-          npm install --prefix apps/desktop --no-audit --no-fund
-          npm --prefix apps/desktop run check
-          npm --prefix apps/desktop run dist:win
+          $ErrorActionPreference = 'Stop'
+          npm install --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { throw "npm install failed" }
+          npm run check
+          if ($LASTEXITCODE -ne 0) { throw "Launcher tests failed" }
+          npm run dist:win
+          if ($LASTEXITCODE -ne 0) { throw "Windows installer build failed" }
+      - name: Collect Windows installers
+        shell: pwsh
+        run: |
           New-Item -ItemType Directory -Force -Path artifacts | Out-Null
           Copy-Item -Path apps/desktop/dist/*.exe -Destination artifacts/
           if (-not (Get-ChildItem artifacts/*.exe)) { throw "Windows installer was not generated" }
@@ -57,14 +65,18 @@ jobs:
           python -m pip install Pillow==11.3.0
           python apps/icons/make-icons.py
       - name: Test launcher navigation and build Intel / Apple Silicon DMGs
+        working-directory: apps/desktop
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: |
           set -euo pipefail
-          npm install --prefix apps/desktop --no-audit --no-fund
-          npm --prefix apps/desktop run check
-          npm --prefix apps/desktop run dist:mac:x64
-          npm --prefix apps/desktop run dist:mac:arm64
+          npm install --no-audit --no-fund
+          npm run check
+          npm run dist:mac:x64
+          npm run dist:mac:arm64
+      - name: Collect Mac installers
+        run: |
+          set -euo pipefail
           mkdir -p artifacts
           cp apps/desktop/dist/*.dmg artifacts/
           test "$(find artifacts -name '*.dmg' | wc -l | tr -d ' ')" -ge 2
@@ -86,7 +98,9 @@ jobs:
           java-version: '17'
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
-      - uses: android-actions/setup-android@v3
+      - name: Install Android 35 platform on hosted runner
+        run: |
+          sdkmanager --install 'platforms;android-35' 'build-tools;35.0.0'
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
