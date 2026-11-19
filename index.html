@@ -6,13 +6,19 @@
   <meta name="theme-color" content="#070b18">
   <meta name="description" content="UGN Java MC Browser Edition. A real Java-compatible Minecraft browser client. No launcher. Your world starts here.">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>UGN Java | MC Browser Edition</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="UGN Java">
   <link rel="stylesheet" href="./landing.css">
+  <link rel="stylesheet" href="./apps/apps.css">
   <script src="./scene.js" defer></script>
   <script src="./client-config.js" defer></script>
   <script src="./app.js" defer></script>
+  <script src="./apps/apps.js" defer></script>
 </head>
 <body>
   <div class="startup" id="startup" aria-hidden="true">
@@ -43,6 +49,7 @@
       <nav class="site-nav" aria-label="Main">
         <a class="selected" href="#home">PLAY</a>
         <a href="#featured">UGN WORLD</a>
+        <a href="#apps">APPS</a>
         <a href="https://discord.universalgaming.us/" target="_blank" rel="noopener noreferrer">DISCORD ↗</a>
       </nav>
       <div class="masthead-actions">
@@ -96,6 +103,55 @@
       <div class="featured-right">
         <span class="feature-state" id="featured-state"><i></i> SETUP PENDING</span>
         <span class="featured-host" id="featured-host">ADD YOUR SERVER IN CONFIG</span>
+      </div>
+    </section>
+
+    <section id="apps" class="apps" aria-labelledby="apps-title">
+      <div class="apps-header">
+        <div>
+          <span class="apps-kicker">UGN / CROSS-PLATFORM CLIENTS</span>
+          <h2 id="apps-title">TAKE THE <span>UNIVERSE</span> WITH YOU.</h2>
+          <p>The same UGN Java experience, now with dedicated Windows, macOS and Android app builds. Play right here or install a first-party launcher. iPhone and iPad can install the web app from Safari.</p>
+        </div>
+        <button id="install-web-app" type="button" hidden>INSTALL WEB APP ↗</button>
+      </div>
+      <div class="apps-platforms">
+        <article class="apps-platform">
+          <div class="apps-platform-title"><span class="apps-platform-symbol" aria-hidden="true">▦</span><h3>WINDOWS</h3></div>
+          <small>10 / 11 · X64</small>
+          <p>A dedicated UGN Java desktop window with mouse capture and full-screen gameplay.</p>
+          <a id="download-windows" href="https://github.com/Universal-Gaming/UGN-Bedrock/releases" target="_blank" rel="noopener noreferrer">CHECK BUILD STATUS ↗</a>
+        </article>
+        <article class="apps-platform">
+          <div class="apps-platform-title"><span class="apps-platform-symbol" aria-hidden="true">◈</span><h3>ANDROID</h3></div>
+          <small>ANDROID 8+ · APK PREVIEW</small>
+          <p>First-party Android WebView shell with UGN branding and touchscreen controls.</p>
+          <a id="download-android" href="https://github.com/Universal-Gaming/UGN-Bedrock/releases" target="_blank" rel="noopener noreferrer">CHECK BUILD STATUS ↗</a>
+        </article>
+        <article class="apps-platform">
+          <div class="apps-platform-title"><span class="apps-platform-symbol" aria-hidden="true">⌘</span><h3>MAC · APPLE SILICON</h3></div>
+          <small>M1+ · ARM64</small>
+          <p>UGN Java desktop for Apple Silicon Macs, packaged as a macOS disk image.</p>
+          <a id="download-mac-apple" href="https://github.com/Universal-Gaming/UGN-Bedrock/releases" target="_blank" rel="noopener noreferrer">CHECK BUILD STATUS ↗</a>
+        </article>
+        <article class="apps-platform">
+          <div class="apps-platform-title"><span class="apps-platform-symbol" aria-hidden="true">⌘</span><h3>MAC · INTEL</h3></div>
+          <small>INTEL MAC · X64</small>
+          <p>A separate macOS build for Intel Macs, using the same UGN Java interface.</p>
+          <a id="download-mac-intel" href="https://github.com/Universal-Gaming/UGN-Bedrock/releases" target="_blank" rel="noopener noreferrer">CHECK BUILD STATUS ↗</a>
+        </article>
+        <article class="apps-platform">
+          <div class="apps-platform-title"><span class="apps-platform-symbol" aria-hidden="true">◉</span><h3>IPHONE / IPAD</h3></div>
+          <small>SAFARI HOME SCREEN APP</small>
+          <p>Open this site in Safari, tap Share, then Add to Home Screen. A separately signed native iOS IPA is not available yet.</p>
+          <a href="https://support.apple.com/guide/iphone/bookmark-a-website-iph42ab2f3a7/ios" target="_blank" rel="noopener noreferrer">APPLE INSTALL GUIDE ↗</a>
+        </article>
+      </div>
+      <div class="apps-disclaimer">
+        <strong>PREVIEW RELEASES</strong>
+        <span id="apps-status" class="apps-status" role="status">Checking for UGN installers…</span>
+        <span>Unsigned Windows/macOS builds and debug-signed Android previews need testing. Internet required; local worlds do not automatically sync between devices.</span>
+        <a href="https://github.com/Universal-Gaming/UGN-Bedrock/actions/workflows/build-apps.yml" target="_blank" rel="noopener noreferrer">APP BUILD STATUS ↗</a>
       </div>
     </section>
 

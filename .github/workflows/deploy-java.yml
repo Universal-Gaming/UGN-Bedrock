@@ -39,6 +39,10 @@ jobs:
           path: upstream
           persist-credentials: false
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -115,7 +119,12 @@ jobs:
           node ugn/scripts/verify-game-assets.mjs upstream
           node ugn/scripts/audit-vanilla-resources.mjs upstream
           test -s upstream/dist/index.html
-          mkdir -p public/client
+          python -m pip install Pillow==11.3.0
+          python ugn/apps/icons/make-icons.py
+          mkdir -p public/client public/apps
+          cp ugn/apps/apps.js ugn/apps/apps.css public/apps/
+          cp ugn/manifest.webmanifest public/
+          cp -a ugn/icons public/icons
           cp -a upstream/dist/. public/client/
           cp ugn/index.html ugn/landing.css ugn/app.js ugn/scene.js ugn/client-config.js ugn/favicon.svg ugn/server-config.json ugn/mouse-test.html ugn/mouse-test.css ugn/mouse-test.js public/
           cp ugn/THIRD_PARTY_NOTICES.md public/THIRD_PARTY_NOTICES.md
@@ -140,6 +149,11 @@ jobs:
           test -s public/mouse-test.html
           test -s public/mouse-test.css
           test -s public/mouse-test.js
+          test -s public/apps/apps.js
+          test -s public/apps/apps.css
+          test -s public/manifest.webmanifest
+          test -s public/icons/icon-192.png
+          test -s public/icons/icon-512.png
           node ugn/scripts/verify-pages-output.mjs public upstream/config.json
 
       - name: Upload GitHub Pages artifact

@@ -21,6 +21,8 @@ jobs:
       - name: Validate JavaScript syntax
         run: |
           node --check app.js
+          node --check apps/apps.js
+          python -m py_compile apps/icons/make-icons.py
           node --check mouse-test.js
           node --check scene.js
           node --check client-config.js
@@ -39,6 +41,16 @@ jobs:
           test -s index.html
           test -s styles.css
           test -s app.js
+          test -s apps/apps.js
+          test -s apps/apps.css
+          test -s apps/desktop/main.cjs
+          test -s apps/desktop/url-policy.cjs
+          test -s apps/desktop/package.json
+          test -s apps/android/app/src/main/java/us/universalgaming/java/MainActivity.java
+          test -s apps/ios/Sources/UGNJavaApp.swift
+          test -s manifest.webmanifest
+          test -s .github/workflows/build-apps.yml
+          grep -q 'id="apps"' index.html
           test -s mouse-test.html
           test -s mouse-test.css
           test -s mouse-test.js

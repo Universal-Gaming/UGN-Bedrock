@@ -1,0 +1,177 @@
+name: Build UGN Apps
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - '.github/workflows/build-apps.yml'
+      - 'manifest.webmanifest'
+permissions:
+  contents: write
+concurrency:
+  group: ugn-apps-preview
+  cancel-in-progress: true
+
+jobs:
+  desktop-windows:
+    runs-on: windows-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Generate UGN branding
+        run: |
+          python -m pip install Pillow==11.3.0
+          python apps/icons/make-icons.py
+      - name: Test launcher navigation and build Windows installer
+        shell: pwsh
+        run: |
+          npm install --prefix apps/desktop --no-audit --no-fund
+          npm --prefix apps/desktop run check
+          npm --prefix apps/desktop run dist:win
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          Copy-Item -Path apps/desktop/dist/*.exe -Destination artifacts/
+          if (-not (Get-ChildItem artifacts/*.exe)) { throw "Windows installer was not generated" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UGN-Windows
+          path: artifacts/*.exe
+          if-no-files-found: error
+          retention-days: 45
+
+  desktop-mac:
+    runs-on: macos-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Generate UGN branding
+        run: |
+          python -m pip install Pillow==11.3.0
+          python apps/icons/make-icons.py
+      - name: Test launcher navigation and build Intel / Apple Silicon DMGs
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          set -euo pipefail
+          npm install --prefix apps/desktop --no-audit --no-fund
+          npm --prefix apps/desktop run check
+          npm --prefix apps/desktop run dist:mac:x64
+          npm --prefix apps/desktop run dist:mac:arm64
+          mkdir -p artifacts
+          cp apps/desktop/dist/*.dmg artifacts/
+          test "$(find artifacts -name '*.dmg' | wc -l | tr -d ' ')" -ge 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UGN-macOS
+          path: artifacts/*.dmg
+          if-no-files-found: error
+          retention-days: 45
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Generate UGN branding
+        run: |
+          python -m pip install Pillow==11.3.0
+          python apps/icons/make-icons.py
+      - name: Compile Android installable test APK
+        run: |
+          gradle --project-dir apps/android :app:assembleDebug --no-daemon
+          mkdir -p artifacts
+          cp apps/android/app/build/outputs/apk/debug/app-debug.apk artifacts/UGN-Java-Android-Preview.apk
+          test -s artifacts/UGN-Java-Android-Preview.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UGN-Android
+          path: artifacts/*.apk
+          if-no-files-found: error
+          retention-days: 45
+
+  ios-simulator:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Generate icon and Xcode project
+        run: |
+          python -m pip install Pillow==11.3.0
+          python apps/icons/make-icons.py
+          python -c "from PIL import Image; Image.open('apps/desktop/assets/icon.png').convert('RGB').save('apps/ios/Sources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png')"
+          brew install xcodegen
+          xcodegen generate --spec apps/ios/project.yml --project apps/ios
+      - name: Build unsigned simulator-only iOS app
+        run: |
+          xcodebuild -project apps/ios/UGNJava.xcodeproj -scheme UGNJava -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/UGNJavaDerived" CODE_SIGNING_ALLOWED=NO build
+          test -d "$RUNNER_TEMP/UGNJavaDerived/Build/Products/Release-iphonesimulator/UGNJava.app"
+      - name: Archive iOS simulator build (not an iPhone IPA)
+        run: |
+          mkdir -p artifacts
+          ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/UGNJavaDerived/Build/Products/Release-iphonesimulator/UGNJava.app" artifacts/UGN-Java-iOS-Simulator-Only.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UGN-iOS-Simulator
+          path: artifacts/*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+  publish-preview:
+    needs: [desktop-windows, desktop-mac, android, ios-simulator]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: UGN-*
+          path: release
+          merge-multiple: true
+      - name: Confirm installable packages, not simulator binary
+        run: |
+          set -euo pipefail
+          test "$(find release -maxdepth 1 -name '*.exe' | wc -l)" -ge 1
+          test "$(find release -maxdepth 1 -name '*.dmg' | wc -l)" -ge 2
+          test "$(find release -maxdepth 1 -name '*.apk' | wc -l)" -ge 1
+          rm -f release/*Simulator*.zip
+          ls -lah release
+      - name: Publish UGN Apps Preview (unsigned/test builds)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apps-preview
+          target_commitish: main
+          name: UGN Java Apps — Preview
+          prerelease: true
+          make_latest: false
+          overwrite_files: true
+          fail_on_unmatched_files: true
+          files: |
+            release/*.exe
+            release/*.dmg
+            release/*.apk
+          body: |
+            UGN Java first-party app previews.
+            Windows and macOS installers are unsigned, and the Android APK is
+            debug-signed for testing. iPhone users should choose Add to Home Screen
+            in Safari; a native iOS IPA requires Apple signing.
+            Game assets load from the live UGN website, so internet is required.
+            These are test builds, not App Store / Play Store releases.

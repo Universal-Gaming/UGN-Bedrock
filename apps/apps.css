@@ -1,0 +1,23 @@
+/* UGN Apps: authentic game launcher download shelf, matches the existing site. */
+.site-nav a[href="#apps"]{white-space:nowrap}
+.apps{position:relative!important;z-index:3;margin:38px clamp(25px,5.5vw,110px) 0;padding:32px clamp(18px,3vw,45px);border:1px solid #7d83c45a;border-radius:7px;background:linear-gradient(135deg,#101936ee,#151733ef);box-shadow:0 16px 55px #0004;backdrop-filter:blur(18px)}
+.apps-header{display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid #9a9edc3e;padding-bottom:21px}
+.apps-kicker{font-size:10px;color:#72f1c6;letter-spacing:.2em;font-weight:900}
+.apps h2{font-weight:1000;font-size:clamp(29px,3.7vw,48px);letter-spacing:-.05em;margin:10px 0 11px}
+.apps h2 span{color:#80ddff}.apps-header p{max-width:610px;color:#b4c3dc;line-height:1.8;font-size:12px;margin:0}
+.apps-platforms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:25px}
+.apps-platform{padding:21px 17px 20px;border:1px solid #7289b45b;background:linear-gradient(155deg,#172343e8,#111c36ed);border-radius:5px;display:flex;flex-direction:column;min-height:230px;gap:11px;transition:border-color .2s,transform .2s}
+.apps-platform:hover{border-color:#7ad7f3b6;transform:translateY(-2px)}
+.apps-platform-title{display:flex;align-items:center;gap:11px}.apps-platform-symbol{display:grid;place-items:center;background:#262b5b;color:#96dbff;width:38px;height:38px;border-radius:5px;font-size:20px;font-weight:950}
+.apps-platform h3{font-size:16px;letter-spacing:.04em;margin:0}.apps-platform p{font-size:11px;color:#b2bfd8;line-height:1.6;margin:0;flex:1}
+.apps-platform small{font-size:9px;color:#c0b5ee;letter-spacing:.08em}
+.apps-platform a{display:block;color:#b5c9ef;text-align:center;border:1px solid #6878a2;padding:11px 10px;border-radius:3px;font-weight:900;letter-spacing:.07em;font-size:10px;text-decoration:none}
+.apps-platform a.available{color:#08253a;background:linear-gradient(110deg,#7dffb6,#74d9f8);border-color:#9bffe0}
+.apps-platform a:hover{filter:brightness(1.14)}
+.apps-disclaimer{display:flex;align-items:center;gap:15px;flex-wrap:wrap;margin-top:20px;color:#9faece;font-size:10px;line-height:1.7}
+.apps-disclaimer strong{color:#d4e2fc}.apps-disclaimer a{color:#a1e8ff}
+.apps-status{padding-left:11px;border-left:2px solid #78e1f2}
+button#install-web-app{padding:10px 13px;border:1px solid #7ad9c4;background:#123e47;color:#cdf9ed;border-radius:4px;font-weight:850;font-size:11px}
+button#install-web-app[hidden]{display:none}
+@media(max-width:1050px){.apps-platforms{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:610px){.apps{margin:23px 18px 0;padding:24px 15px}.apps-platforms{grid-template-columns:1fr}.apps-platform{min-height:180px}.apps h2{font-size:32px}.apps-header p{font-size:11px}}

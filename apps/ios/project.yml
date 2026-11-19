@@ -1,0 +1,25 @@
+name: UGNJava
+options:
+  bundleIdPrefix: us.universalgaming
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+targets:
+  UGNJava:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: us.universalgaming.java
+        GENERATE_INFOPLIST_FILE: "YES"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: UGN Java
+        UILaunchScreen: {}

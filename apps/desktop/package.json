@@ -1,0 +1,53 @@
+{
+  "name": "ugn-java-desktop",
+  "version": "0.1.0",
+  "description": "UGN Java MC Browser Edition first-party desktop application",
+  "main": "main.cjs",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "check": "node --check main.cjs && node --test test.cjs",
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis --x64 --publish never",
+    "dist:mac:x64": "electron-builder --mac dmg --x64 --publish never",
+    "dist:mac:arm64": "electron-builder --mac dmg --arm64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "39.1.1",
+    "electron-builder": "26.12.1"
+  },
+  "build": {
+    "appId": "us.universalgaming.java",
+    "productName": "UGN Java",
+    "asar": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "main.cjs",
+      "url-policy.cjs",
+      "assets/icon.png",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.games",
+      "hardenedRuntime": false,
+      "notarize": false
+    },
+    "dmg": {
+      "sign": false
+    },
+    "artifactName": "UGN-Java-${os}-${arch}-${version}.${ext}"
+  }
+}

@@ -67,3 +67,8 @@ THIRD_PARTY_NOTICES.md  Source attribution and license
 .github/workflows/deploy-java.yml
 .github/workflows/validate.yml
 ```
+
+
+## Installable UGN apps
+
+The homepage now includes an Apps section. First-party Electron Windows / macOS shells and an Android WebView APK are built and uploaded by the separate Build UGN Apps workflow, with dynamically verified release downloads. iPhone users can install the web app from Safari; the native iOS SwiftUI project is included but a signed device IPA requires Apple Developer credentials. See apps/README.md. App shells load the live browser game; they are not offline copies of Mojang's Java executable or automatic world-sync clients.
