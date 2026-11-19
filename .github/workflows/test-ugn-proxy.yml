@@ -1,0 +1,25 @@
+name: Test UGN Private Proxy
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'proxy/**'
+      - '.github/workflows/test-ugn-proxy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-relay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install exact WebSocket dependency
+        working-directory: proxy
+        run: npm install --no-audit --no-fund
+      - name: Syntax, protocol, isolation and transfer tests
+        working-directory: proxy
+        run: npm run check

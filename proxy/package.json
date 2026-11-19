@@ -1,0 +1,18 @@
+{
+  "name": "ugn-java-private-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "UGN-owned Minecraft browser HTTP/WebSocket-to-Java relay",
+  "main": "server.cjs",
+  "scripts": {
+    "start": "node server.cjs",
+    "test": "node --test test/*.test.cjs",
+    "check": "node --check server.cjs && npm test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "ws": "8.18.3"
+  }
+}
