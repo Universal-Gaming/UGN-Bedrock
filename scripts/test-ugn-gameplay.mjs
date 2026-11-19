@@ -119,3 +119,25 @@ entity.position.x++
 scene.updateEntityPosition(entity,false,{})
 assert.equal(mob.userData._ugnMoveMs,100)
 console.log('UGN mob checks passed for walking, turning, duplicate updates and pause recovery')
+
+const farSpawn = {x: -2304, y: 72, z: 8128}
+const actual = {x:farSpawn.x+2,y:farSpawn.y,z:farSpawn.z-1}
+const sections = []
+let animationDelta = 0
+Object.assign(mob, {position:{x:2,y:0,z:-1}, traverse() {}})
+Object.assign(scene, {
+  clock: {update(){}, getDelta:()=>0.05}, syncSceneAttachment(){}, isRenderingAllowed:()=>true,
+  maybeRenderPlayerSkin(){}, syncArmorPositions(){}, updateVehiclePassengerPositions(){},
+  applyRemoteBoatPassengerRotations(){}, applyLocalThirdPersonPlayerRotation(){},
+  updateBoatPaddleAnimations(dt){animationDelta=dt}, applyEntityLights(){}
+})
+Object.assign(scene.worldRenderer, {
+  viewerChunkPosition:farSpawn, sceneOrigin:{getWorldPosition:()=>actual},
+  entitySectionKey(x,y,z){ sections.push([x,y,z]); return 'mob section' },
+  isSectionOcclusionVisible:()=>true, shouldObjectVisible:()=>false
+})
+scene.render()
+assert.equal(mob.visible,true)
+assert.deepEqual(sections,[[actual.x,actual.y,actual.z]])
+assert.equal(animationDelta,0.05)
+console.log('UGN visibility and low-frame-rate animation checks passed')

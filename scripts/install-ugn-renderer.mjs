@@ -158,3 +158,21 @@ replace(entities, "    if (typeof targetYaw === 'number' && Number.isFinite(targ
         e.userData._ugnTargetYaw = cameraSynced ? undefined : targetYaw
         if (e.userData._rotTween?.isPlaying()) e.userData._rotTween.update(performance.now(), false)
       }`)
+
+// Scene coordinates are camera-relative. Occlusion keys and player distance
+// must use the mob's world coordinates, including far from the world origin.
+replace(entities, '    const dt = Math.min(this.clock.getDelta(), 1 / 30)', `    const ugn = !!this.worldRenderer.initOptions.rendererSpecificSettings?.ugnPolicy
+    const dt = Math.min(this.clock.getDelta(), ugn ? 0.1 : 1 / 30)`)
+replace(entities, `        const dx = entity.position.x - botPos.x
+        const dy = entity.position.y - botPos.y
+        const dz = entity.position.z - botPos.z`, `        const origin = this.worldRenderer.sceneOrigin
+        const pos = ugn ? origin.getWorldPosition(entity) ?? {
+          x: origin.toWorldX(entity.position.x),
+          y: origin.toWorldY(entity.position.y),
+          z: origin.toWorldZ(entity.position.z)
+        } : entity.position
+        const dx = pos.x - botPos.x
+        const dy = pos.y - botPos.y
+        const dz = pos.z - botPos.z`)
+replace(entities, 'const sectionKey = this.worldRenderer.entitySectionKey(entity.position.x, entity.position.y, entity.position.z)',
+  'const sectionKey = this.worldRenderer.entitySectionKey(pos.x, pos.y, pos.z)')
