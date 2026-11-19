@@ -127,6 +127,7 @@ jobs:
           node --check ugn/game-performance.js
           node --check ugn/scripts/install-game-performance.mjs
           node ugn/scripts/test-install-game-performance.mjs
+          node ugn/scripts/test-game-performance.mjs
           node ugn/scripts/install-game-performance.mjs upstream
 
       - name: Verify compiled client and assemble GitHub Pages
