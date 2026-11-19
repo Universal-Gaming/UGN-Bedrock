@@ -3,6 +3,18 @@
   'use strict';
   if (window.__UGN_PERF_DIAGNOSTICS__) return;
   window.__UGN_PERF_DIAGNOSTICS__ = true;
+  // Automatically reduce menu-only animation cost on constrained devices,
+  // or when the player explicitly selected the lightweight UGN mode.
+  // Gameplay render settings and saved worlds are never altered.
+  let lightweight = false;
+  try { lightweight = localStorage.getItem('ugn-lightweight-home') === '1'; } catch {}
+  if (navigator.deviceMemory && navigator.deviceMemory <= 4) lightweight = true;
+  if (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) lightweight = true;
+  if (lightweight) {
+    const style = document.createElement('style');
+    style.textContent = '.ugn-menu-background *{animation:none!important;transition:none!important;filter:none!important}';
+    (document.head || document.documentElement).append(style);
+  }
   const frames = [];
   const longTasks = [];
   let active = false, raf = 0, previous = 0, started = 0, timer = 0, observer;
