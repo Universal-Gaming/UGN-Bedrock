@@ -26,6 +26,7 @@ requireFile(path.join(output,"index.html"),100);
 requireFile(path.join(output,"app.js"),500);
 requireFile(path.join(output,"landing.css"),500);
 requireFile(path.join(client,"index.html"),500);
+requireFile(path.join(client,"ugn-performance.js"),1000);
 requireFile(path.join(client,"mesher.js"),1000);
 requireFile(path.join(client,"lightOwnerWorker.js"),500);
 const manifest=readJson(path.join(client,"ugn-build.json"));
@@ -49,6 +50,7 @@ if(cfg?.featuredServer?.enabled){
 const htmlFile=path.join(client,"index.html");
 if(fs.existsSync(htmlFile)){
   const html=fs.readFileSync(htmlFile,"utf8");
+  if(!html.includes('src="./ugn-performance.js"'))errors.push("Game performance overlay is not referenced by compiled client.");
   const refs=[];
   for(const tag of html.matchAll(/<(?:script|link)\b[^>]*>/gi)){
     const match=tag[0].match(/\b(?:src|href)=["']([^"']+)["']/i);
