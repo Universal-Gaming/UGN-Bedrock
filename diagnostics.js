@@ -8,7 +8,7 @@ function collect(){
  const nav=navigator,mem=nav.deviceMemory,cores=nav.hardwareConcurrency,conn=nav.connection||nav.mozConnection||nav.webkitConnection;
  const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
  const canvas=document.createElement("canvas"),gl=canvas.getContext("webgl2",{powerPreference:"low-power"})||canvas.getContext("webgl",{powerPreference:"low-power"});
- const info={webgl:gl?(gl instanceof WebGL2RenderingContext?"WebGL 2":"WebGL 1"):"Unavailable",maxTexture:gl?gl.getParameter(gl.MAX_TEXTURE_SIZE):null,cores:cores||null,memoryGB:mem||null,devicePixelRatio:Math.round((devicePixelRatio||1)*100)/100,viewport:innerWidth+" x "+innerHeight,reducedMotion:reduced,online:nav.onLine,connectionType:conn?.effectiveType||"Not reported",saveData:conn?.saveData===true};
+ const info={webgl:gl?(typeof WebGL2RenderingContext!=="undefined"&&gl instanceof WebGL2RenderingContext?"WebGL 2":"WebGL 1"):"Unavailable",maxTexture:gl?gl.getParameter(gl.MAX_TEXTURE_SIZE):null,cores:cores||null,memoryGB:mem||null,devicePixelRatio:Math.round((devicePixelRatio||1)*100)/100,viewport:innerWidth+" x "+innerHeight,reducedMotion:reduced,online:nav.onLine,connectionType:conn?.effectiveType||"Not reported",saveData:conn?.saveData===true};
  if(gl){gl.getExtension("WEBGL_lose_context")?.loseContext();}
  report.device=info;$("details").replaceChildren();Object.entries(info).forEach(([k,v])=>detail(k,v??"Not reported"));
  $("webgl-value").textContent=info.webgl;$("webgl-note").textContent=info.maxTexture?"Max texture "+info.maxTexture+" px":"Software rendering or unsupported WebGL possible";
