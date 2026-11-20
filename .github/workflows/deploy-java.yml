@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -126,6 +128,14 @@ jobs:
           DISABLE_SERVICE_WORKER: 'true'
         run: pnpm build
 
+      - name: Install opt-in gameplay performance monitor
+        run: |
+          node --check ugn/game-performance.js
+          node --check ugn/scripts/install-game-performance.mjs
+          node ugn/scripts/test-install-game-performance.mjs
+          node ugn/scripts/test-game-performance.mjs
+          node ugn/scripts/install-game-performance.mjs upstream
+
       - name: Verify compiled client and assemble GitHub Pages
         shell: bash
         run: |
@@ -140,7 +150,7 @@ jobs:
           cp ugn/manifest.webmanifest public/
           cp -a ugn/icons public/icons
           cp -a upstream/dist/. public/client/
-          cp ugn/index.html ugn/landing.css ugn/app.js ugn/scene.js ugn/client-config.js ugn/favicon.svg ugn/server-config.json ugn/mouse-test.html ugn/mouse-test.css ugn/mouse-test.js public/
+          cp ugn/index.html ugn/landing.css ugn/app.js ugn/scene.js ugn/client-config.js ugn/favicon.svg ugn/server-config.json ugn/mouse-test.html ugn/mouse-test.css ugn/mouse-test.js ugn/diagnostics.html ugn/diagnostics.css ugn/diagnostics.js public/
           cp ugn/THIRD_PARTY_NOTICES.md public/THIRD_PARTY_NOTICES.md
           touch public/.nojekyll
           cat > public/client/ugn-build.json <<'EOF'
@@ -162,6 +172,9 @@ jobs:
           test -s public/server-config.json
           test -s public/mouse-test.html
           test -s public/mouse-test.css
+          test -s public/diagnostics.html
+          test -s public/diagnostics.css
+          test -s public/diagnostics.js
           test -s public/mouse-test.js
           test -s public/apps/apps.js
           test -s public/apps/apps.css
@@ -176,6 +189,7 @@ jobs:
           path: public
 
   deploy:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     needs: build
     environment:
