@@ -1,5 +1,9 @@
 # UGN Java — Play in Your Browser
 
+**[Play UGN Java in your browser](https://universal-gaming.github.io/UGN-Bedrock/)** · [Join the UGN Discord](https://discord.universalgaming.us/)
+
+Open the game page and select **Play Now**. Trying it for the first time? Tell us in Discord which browser you used and how movement felt once the world loaded.
+
 An independently designed, game-first website inspired by the **ease of use** of Eaglercraft, with original UGN space artwork and a real Java-compatible browser client that opens **in the same tab as a full-page UGN game**. No server-directory dashboard, IP checker or downloadable launcher.
 
 ## What is committed
